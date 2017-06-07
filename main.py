@@ -371,6 +371,7 @@ class Button:
     modi = ('Hardmode', 'Classic 10 Lifes', 'Classic 5 Lifes', 'Classic 3 Lifes', 'Time')
 
     def __init__(self, pos, size, text, screen, grayed_out=False):
+        self.rel_pos = pos
         self.rel_size = size
         self.pos = pos[0] * Settings.resolution[0], pos[1] * Settings.resolution[1]
         self.size = size[0] * Settings.resolution[0], size[1] * Settings.resolution[1]
@@ -398,9 +399,9 @@ class Button:
         players = [str(i) + ' Player' + ('s' if i > 1 else '') for i in (2, 1)]
         self.text = players[players.index(self.text) - 1]
         if self.text == '1 Player':
-            self.screen.buttons[5].grayed_out = True
+            self.screen.buttons['Skin2'].grayed_out = True
         elif self.text == '2 Players':
-            self.screen.buttons[5].grayed_out = False
+            self.screen.buttons['Skin2'].grayed_out = False
 
     def modi_event(self):
         modi = [i for i in self.modi]
@@ -409,18 +410,12 @@ class Button:
         # Hardmode: Highscore, nur 1 Leben
         self.text = modi[modi.index(self.text) - 1]
         if self.text in ('Classic 10 Lifes', 'Classic 5 Lifes', 'Classic 3 Lifes', 'Hardmode'):
-            self.screen.buttons[6].grayed_out = True
+            self.screen.buttons['Time'].grayed_out = True
         elif self.text in ('Time',):
-            self.screen.buttons[6].grayed_out = False
+            self.screen.buttons['Time'].grayed_out = False
 
     def start(self):
         window.start_game()
-
-    def skin1_player_event(self):
-        pass
-
-    def skin2_player_event(self):
-        pass
 
     def time_event(self):
         times = ['Time: ' + str(i) + 'min' for i in (10, 5, 2, 1)]
@@ -428,8 +423,21 @@ class Button:
 
 class SkinButton(Button):
     def __init__(self, *kwargs):
-        Button.__init__(*kwargs)
-        self.pskin_button = Button((self.pos[0] + self.size[0] * .4, 0), (self.rel_size[0] * .2, self.rel_size[1]), '', self.screen)
+        Button.__init__(self, *kwargs)
+        # Playerskin
+        self.pskin_button = Button((self.pos[0] + self.size[0] * .4, 0), (self.rel_size[0] * .2, self.rel_size[1]), 'P', self.screen, self.grayed_out)
+        # Laserskin
+        self.lskin_button = Button((self.pos[0] + self.size[0] * .7, 0), (self.rel_size[0] * .2, self.rel_size[1]), 'L', self.screen, self.grayed_out)
+
+    def draw(self, canvas):
+        canvas.draw_polygon([
+                self.pos,
+                (self.pos[0] + self.size[0], self.pos[1]),
+                (self.pos[0] + self.size[0], self.pos[1] + self.size[1]),
+                (self.pos[0], self.pos[1] + self.size[1]),
+            ], 4, '#ffffff', '#cccccc' if self.grayed_out else '#061c54')
+        self.pskin_button.draw(canvas)
+        self.lskin_button.draw(canvas)
 
 class TitleScreen:
     def __init__(self):
@@ -442,30 +450,35 @@ class TitleScreen:
             print('Yo, eins scheiser dreggs Fehla... :/')
         button_texts1 = ['1 Player', Button.modi[-1], 'Begin', 'Exit']
         button_texts2 = ['Skin1: ', 'Skin2: ', 'Time: 1min']
-        self.buttons = [Button((.1, .4 + n * .15), (.35, .1), t, self) for n, t in enumerate(button_texts1)]
-        self.buttons.extend([Button((.55, .4 + n * .15), (.35, .1), t, self) for n, t in enumerate(button_texts2)])
-        self.buttons[5].grayed_out = True
-        self.buttons[0].event = self.buttons[0].single_multiplayer_event
-        self.buttons[1].event = self.buttons[1].modi_event
-        self.buttons[2].event = self.buttons[2].start
-        self.buttons[3].event = exit
-        #self.buttons[4].event = skin1_player_event
-        #self.buttons[5].event = skin2_player_event
-        self.buttons[6].event = self.buttons[6].time_event
+        self.buttons = {
+            'Player_count' : Button((.1, .4), (.35, .1), '1 Player', self),
+            'Modi' : Button((.1, .55), (.35, .1), Button.modi[-1], self),
+            'Begin' : Button((.1, .7), (.35, .1), 'Begin', self),
+            'Exit' : Button((.1, .85), (.35, .1), 'Exit', self),
+            'Skin1' : SkinButton((.55, .4), (.35, .1), 'Skin1', self),
+            'Skin2' : SkinButton((.55, .55), (.35, .1), 'Skin2', self),
+            'Time' : Button((.55, .7), (.35, .1), 'Time: 1min', self)
+        }
+        self.buttons['Skin2'].grayed_out = True
+        self.buttons['Player_count'].event = self.buttons['Player_count'].single_multiplayer_event
+        self.buttons['Modi'].event = self.buttons['Modi'].modi_event
+        self.buttons['Begin'].event = self.buttons['Begin'].start
+        self.buttons['Exit'].event = exit
+        self.buttons['Time'].event = self.buttons['Time'].time_event
 
     def keydown_handler(self, key):
         if key == 27:
             exit(0)
 
     def mouseclick_handler(self, pos):
-        for button in self.buttons:
+        for button in self.buttons.values():
             if (not button.grayed_out) and button.point_collision(pos):
                 button.event()
 
     def draw(self, canvas):
         canvas.draw_image(self.bg_img, (self.bg_sz[0] / 2, self.bg_sz[1] / 2), self.bg_sz, (Settings.resolution[0] / 2, Settings.resolution[1] / 2), Settings.resolution)
         canvas.draw_image(self.title_img, (self.title_sz[0] / 2, self.title_sz[1] / 2), self.title_sz, (Settings.resolution[0] / 2, .2 * self.title_sz[1] / 2), (self.title_sz[0] * .3, self.title_sz[1] * .3))
-        for button in self.buttons:
+        for button in self.buttons.values():
             button.draw(canvas)
 
 class Window:
