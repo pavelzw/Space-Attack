@@ -20,11 +20,60 @@ class Settings:
     growth_min_limit = 200
     growth_const = 0.06
 
+class Resources:
+    image_urls = {
+        'Background1' : 'http://i.imgur.com/q6ivRR9.png',
+        'Background2' : 'http://i.imgur.com/x9DaE82.png',
+
+        'Alien' : 'http://i.imgur.com/KdPWXXD.png',
+        'Batman' : 'http://i.imgur.com/U8H5uo0.png',
+        'Superman' : 'http://i.imgur.com/uHOwtoy.png',
+        'Android' : 'http://i.imgur.com/J8l8oIC.png',
+        'Ironman' : 'http://i.imgur.com/Lv5o6sh.png',
+        'Spiderman' : 'http://i.imgur.com/ZO2iYfG.png',
+        'Mario' : 'http://i.imgur.com/8HFD1Qp.png',
+        'Ninja' : 'http://i.imgur.com/VWT66Bs.png',
+        'Darth Vader' : 'http://i.imgur.com/JKXhtFA.png',
+        'Stormtrooper' : 'http://i.imgur.com/dfBvqyx.png',
+        'Donald Duck' : 'http://i.imgur.com/xSLMyYh.png',
+        'Mickey Mouse' : 'http://i.imgur.com/jOOJ6IB.png',
+        'Hitler' : 'http://i.imgur.com/rYNtjiD.png',
+        'Broccoli' : 'http://i.imgur.com/7mZZqln.png',
+        'Monster1' : 'http://i.imgur.com/76wS3ib.png',
+        'Monster2' : 'http://i.imgur.com/AUnFkau.png',
+        'Monster3' : 'http://i.imgur.com/x8knnvx.png',
+        'Monster4' : 'http://i.imgur.com/OPeyoah.png',
+        'Monster5' : 'http://i.imgur.com/4CkY65O.png',
+        'Monster6' : 'http://i.imgur.com/Zo49XMo.png',
+        'Monster7' : 'http://i.imgur.com/zcLq4T9.png',
+        'Monster8' : 'http://i.imgur.com/ZjY1fwP.png',
+        'Monster9' : 'http://i.imgur.com/J0e55C1.png',
+
+        'Player1' : 'http://i.imgur.com/9np3V0Z.png',
+        'Player2' : 'http://i.imgur.com/7dUlrnE.png',
+        'Player3' : 'http://i.imgur.com/6cuZnRq.png',
+        'Player4' : 'http://i.imgur.com/HhkyvKd.png',
+        'Player5' : 'http://i.imgur.com/29Xwkl3.png',
+
+        'Laser' : 'http://i.imgur.com/kbOI4iJ.png',
+        'Laser1v2' : 'http://i.imgur.com/tM4jjKs.png',
+        'Laser1v3' : 'http://i.imgur.com/xnauZwI.png',
+        'Laser2v1' : 'http://i.imgur.com/kccijdx.png',
+
+        'title image' : 'https://i.ytimg.com/vi/FBeYD7yFWxE/maxresdefault.jpg'
+    }
+
+    images = dict()
+
+    def load():
+        for name, url in Resources.image_urls.items():
+            Resources.images[name] = simplegui.load_image(url)
+
 class Sprite:
     def __init__(self, type, pos=(0, 0), visible=False, rotation=0, scale=Settings.player_scale):
         self.type = type
         self.pos = pos
-        self.image = SpaceAttack.sprite_images[self.type]
+        self.image = Resources.images[self.type]
         self.size = self.image.get_width(), self.image.get_height()
         if self.size == (0, 0): # simplegui Bug, nicht vom Spiel
             print('Yo, schon wieder... :\'(')
@@ -180,46 +229,6 @@ class SpaceAttack:
     spawncount = 0
     limit = 0
 
-    image_urls = {
-        'Background1' : 'http://i.imgur.com/q6ivRR9.png',
-        'Background2' : 'http://i.imgur.com/x9DaE82.png',
-
-        'Alien' : 'http://i.imgur.com/KdPWXXD.png',
-        'Batman' : 'http://i.imgur.com/U8H5uo0.png',
-        'Superman' : 'http://i.imgur.com/uHOwtoy.png',
-        'Android' : 'http://i.imgur.com/J8l8oIC.png',
-        'Ironman' : 'http://i.imgur.com/Lv5o6sh.png',
-        'Spiderman' : 'http://i.imgur.com/ZO2iYfG.png',
-        'Mario' : 'http://i.imgur.com/8HFD1Qp.png',
-        'Ninja' : 'http://i.imgur.com/VWT66Bs.png',
-        'Darth Vader' : 'http://i.imgur.com/JKXhtFA.png',
-        'Stormtrooper' : 'http://i.imgur.com/dfBvqyx.png',
-        'Donald Duck' : 'http://i.imgur.com/xSLMyYh.png',
-        'Mickey Mouse' : 'http://i.imgur.com/jOOJ6IB.png',
-        'Hitler' : 'http://i.imgur.com/rYNtjiD.png',
-        'Broccoli' : 'http://i.imgur.com/7mZZqln.png',
-        'Monster1' : 'http://i.imgur.com/76wS3ib.png',
-        'Monster2' : 'http://i.imgur.com/AUnFkau.png',
-        'Monster3' : 'http://i.imgur.com/x8knnvx.png',
-        'Monster4' : 'http://i.imgur.com/OPeyoah.png',
-        'Monster5' : 'http://i.imgur.com/4CkY65O.png',
-        'Monster6' : 'http://i.imgur.com/Zo49XMo.png',
-        'Monster7' : 'http://i.imgur.com/zcLq4T9.png',
-        'Monster8' : 'http://i.imgur.com/ZjY1fwP.png',
-        'Monster9' : 'http://i.imgur.com/J0e55C1.png',
-        
-        'Player1' : 'http://i.imgur.com/9np3V0Z.png',
-        'Player2' : 'http://i.imgur.com/7dUlrnE.png',
-        'Player3' : 'http://i.imgur.com/6cuZnRq.png',
-        'Player4' : 'http://i.imgur.com/HhkyvKd.png',
-        'Player5' : 'http://i.imgur.com/29Xwkl3.png',
-        
-        'Laser' : 'http://i.imgur.com/kbOI4iJ.png',
-        'Laser1v2' : 'http://i.imgur.com/tM4jjKs.png',
-        'Laser1v3' : 'http://i.imgur.com/xnauZwI.png',
-        'Laser2v1' : 'http://i.imgur.com/kccijdx.png'
-    }
-
     enemy_names = ['Alien', 'Batman', 'Superman', 'Android', 'Ironman',
         'Spiderman', 'Mario', 'Ninja', 'Darth Vader', 'Stormtrooper',
         'Donald Duck', 'Mickey Mouse', 'Hitler', 'Broccoli', 'Monster1',
@@ -229,20 +238,13 @@ class SpaceAttack:
     player_names = ['Player1', 'Player2', 'Player3', 'Player4', 'Player5']
     background_names = ['Background1', 'Background2']
 
-    sprite_images = dict()
-
     def __init__(self, size):
         self.size = size
         self.sprites = dict()
-        self.load_images()
         self.load_background()
         self.load_players()
         self.running = False
         self.enemy_counter = 0
-
-    def load_images(self):
-        for name, url in self.image_urls.items():
-            self.__class__.sprite_images[name] = simplegui.load_image(url)
 
     def load_background(self):
         self.background_name = random.choice(self.__class__.background_names)
@@ -279,7 +281,7 @@ class SpaceAttack:
                             lsize = laser.rl_size
                             spos = (sprite.pos[0] - ssize[0] * 0.5, sprite.pos[1] - ssize[1] * 0.5)
                             lpos = (laser.pos[0] - lsize[0] * 0.5, laser.pos[1] - lsize[1] * 0.5)
-                            if (name[:5] == 'Enemy' and 
+                            if (name[:5] == 'Enemy' and
                                 spos[0] < lpos[0] + lsize[0] and
                                 spos[0] + ssize[0] > lpos[0] and
                                 spos[1] < lpos[1] + lsize[1] and
@@ -367,7 +369,7 @@ class SpaceAttack:
             self.limit = Settings.growth_min_limit + (Settings.growth_max_limit - Settings.growth_min_limit) * exp(-self.enemy_counter * Settings.growth_const)
             self.spawncount = self.limit
 
-class Button:
+class Button(object):
     modi = ('Hardmode', 'Classic 10 Lifes', 'Classic 5 Lifes', 'Classic 3 Lifes', 'Time')
 
     def __init__(self, pos, size, text, screen, grayed_out=False):
@@ -378,6 +380,7 @@ class Button:
         self.text = text
         self.grayed_out = grayed_out
         self.screen = screen
+        self.border = True
 
     def draw(self, canvas):
         canvas.draw_polygon([
@@ -385,7 +388,7 @@ class Button:
                 (self.pos[0] + self.size[0], self.pos[1]),
                 (self.pos[0] + self.size[0], self.pos[1] + self.size[1]),
                 (self.pos[0], self.pos[1] + self.size[1]),
-            ], 4, '#ffffff', '#cccccc' if self.grayed_out else '#061c54')
+            ], 4 if self.border else 1, '#ffffff', '#cccccc' if self.grayed_out else '#061c54')
         canvas.draw_text(self.text, (self.pos[0] + 10, self.pos[1] + self.size[1] * 3 / 4), self.size[1] // 2, 'White', 'sans-serif')
 
     def event(self):
@@ -400,8 +403,12 @@ class Button:
         self.text = players[players.index(self.text) - 1]
         if self.text == '1 Player':
             self.screen.buttons['Skin2'].grayed_out = True
+            self.screen.buttons['Skin2'].pskin_button.grayed_out = True
+            self.screen.buttons['Skin2'].lskin_button.grayed_out = True
         elif self.text == '2 Players':
             self.screen.buttons['Skin2'].grayed_out = False
+            self.screen.buttons['Skin2'].pskin_button.grayed_out = False
+            self.screen.buttons['Skin2'].lskin_button.grayed_out = False
 
     def modi_event(self):
         modi = [i for i in self.modi]
@@ -421,45 +428,49 @@ class Button:
         times = ['Time: ' + str(i) + 'min' for i in (10, 5, 2, 1)]
         self.text = times[times.index(self.text) - 1]
 
+class ImageButton(Button):
+    def __init__(self, *kwargs):
+        Button.__init__(self, *kwargs)
+
 class SkinButton(Button):
     def __init__(self, *kwargs):
         Button.__init__(self, *kwargs)
         # Playerskin
-        self.pskin_button = Button((self.pos[0] + self.size[0] * .4, 0), (self.rel_size[0] * .2, self.rel_size[1]), 'P', self.screen, self.grayed_out)
+        self.pskin_button = Button((self.rel_pos[0] + self.rel_size[0] * .4, self.rel_pos[1]), (self.rel_size[0] * .2, self.rel_size[1]), 'P', self.screen, self.grayed_out)
+        self.pskin_button.border = False
+        self.pskin_button.pos = self.pskin_button.pos[0], self.pskin_button.pos[1] + 1
+        self.pskin_button.size = self.pskin_button.size[0], self.pskin_button.size[1] - 2
         # Laserskin
-        self.lskin_button = Button((self.pos[0] + self.size[0] * .7, 0), (self.rel_size[0] * .2, self.rel_size[1]), 'L', self.screen, self.grayed_out)
+        self.lskin_button = Button((self.rel_pos[0] + self.rel_size[0] * .7, self.rel_pos[1]), (self.rel_size[0] * .2, self.rel_size[1]), 'L', self.screen, self.grayed_out)
+        self.lskin_button.pos = self.lskin_button.pos[0], self.lskin_button.pos[1] + 1
+        self.lskin_button.size = self.lskin_button.size[0], self.lskin_button.size[1] - 2
+        self.lskin_button.border = False
 
     def draw(self, canvas):
-        canvas.draw_polygon([
-                self.pos,
-                (self.pos[0] + self.size[0], self.pos[1]),
-                (self.pos[0] + self.size[0], self.pos[1] + self.size[1]),
-                (self.pos[0], self.pos[1] + self.size[1]),
-            ], 4, '#ffffff', '#cccccc' if self.grayed_out else '#061c54')
+        Button.draw(self, canvas)
         self.pskin_button.draw(canvas)
         self.lskin_button.draw(canvas)
 
 class TitleScreen:
     def __init__(self):
-        self.title_img = simplegui.load_image('https://i.ytimg.com/vi/FBeYD7yFWxE/maxresdefault.jpg')
+        self.title_img = Resources.images['title image']
         self.title_sz = self.title_img.get_width(), self.title_img.get_height()
-        url = SpaceAttack.image_urls[random.choice(SpaceAttack.background_names)]
-        self.bg_img = simplegui.load_image(url)
+        self.bg_img = Resources.images[random.choice(SpaceAttack.background_names)]
         self.bg_sz = self.bg_img.get_width(), self.bg_img.get_height()
         if self.bg_sz == (0, 0):
             print('Yo, eins scheiser dreggs Fehla... :/')
-        button_texts1 = ['1 Player', Button.modi[-1], 'Begin', 'Exit']
-        button_texts2 = ['Skin1: ', 'Skin2: ', 'Time: 1min']
         self.buttons = {
             'Player_count' : Button((.1, .4), (.35, .1), '1 Player', self),
             'Modi' : Button((.1, .55), (.35, .1), Button.modi[-1], self),
             'Begin' : Button((.1, .7), (.35, .1), 'Begin', self),
             'Exit' : Button((.1, .85), (.35, .1), 'Exit', self),
-            'Skin1' : SkinButton((.55, .4), (.35, .1), 'Skin1', self),
-            'Skin2' : SkinButton((.55, .55), (.35, .1), 'Skin2', self),
+            'Skin1' : SkinButton((.55, .4), (.35, .1), 'Player 1', self),
+            'Skin2' : SkinButton((.55, .55), (.35, .1), 'Player 2', self),
             'Time' : Button((.55, .7), (.35, .1), 'Time: 1min', self)
         }
         self.buttons['Skin2'].grayed_out = True
+        self.buttons['Skin2'].pskin_button.grayed_out = True
+        self.buttons['Skin2'].lskin_button.grayed_out = True
         self.buttons['Player_count'].event = self.buttons['Player_count'].single_multiplayer_event
         self.buttons['Modi'].event = self.buttons['Modi'].modi_event
         self.buttons['Begin'].event = self.buttons['Begin'].start
@@ -505,5 +516,6 @@ class Window:
         self.game.update()
 
 if __name__ == '__main__':
+    Resources.load()
     window = Window('Space Attack')
     window.start_title_screen()
