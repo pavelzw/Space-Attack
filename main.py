@@ -166,7 +166,7 @@ class Laser(Sprite):
 
 class PlayerSprite(Sprite):
     def __init__(self, player_number):
-        Sprite.__init__(self, random.choice(SpaceAttack.player_names),
+        Sprite.__init__(self, Settings.player2_skin if player_number else Settings.player1_skin,
             visible=True, scale=Settings.player_scale)
         self.num = player_number
 
@@ -441,7 +441,8 @@ class ImageButton(Button):
         self.indices = list(images.keys())
         self.image_index = 0
         self.image_sizes = tuple((i.get_width(), i.get_height()) for i in self.images.values())
-        self.real_image_sizes = tuple((self.size[0], self.size[0] * sz[0] / sz[1]) if sz[0] > sz[1] else (self.size[1] * sz[0] / sz[1], self.size[1]) for sz in self.image_sizes)
+        aspect_ratio = self.size[0] / self.size[1]
+        self.real_image_sizes = tuple((self.size[0], self.size[0] * sz[1] / sz[0]) if sz[0] / sz[1] > aspect_ratio else (self.size[1] * sz[0] / sz[1], self.size[1]) for sz in self.image_sizes)
         self.event = self.switch
         self.is_player1, self.is_player_skin = is_player1, is_player_skin
 
