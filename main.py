@@ -196,7 +196,7 @@ class Player(PlayerSprite):
 
     def shoot(self):
         if not self.cooldown:
-            laser_pair = Laser(True, laser_skin), Laser(False, laser_skin)
+            laser_pair = Laser(True, self.laser_skin), Laser(False, self.laser_skin)
             n = -sin(self.rotation - pi / 2), cos(self.rotation - pi / 2)
             d = n[0] * Settings.laser_distance, n[1] * Settings.laser_distance
             laser_pair[0].shoot((self.pos[0] + d[0], self.pos[1] + d[1]), self.rotation)
@@ -409,12 +409,12 @@ class Button:
         self.text = players[players.index(self.text) - 1]
         if self.text == '1 Player':
             self.screen.buttons['Skin2'].grayed_out = True
-            self.screen.buttons['Skin2'].pskin_button.grayed_out = True
-            self.screen.buttons['Skin2'].lskin_button.grayed_out = True
+            self.screen.buttons['Skin2Player'].grayed_out = True
+            self.screen.buttons['Skin2Laser'].grayed_out = True
         elif self.text == '2 Players':
             self.screen.buttons['Skin2'].grayed_out = False
-            self.screen.buttons['Skin2'].pskin_button.grayed_out = False
-            self.screen.buttons['Skin2'].lskin_button.grayed_out = False
+            self.screen.buttons['Skin2Player'].grayed_out = False
+            self.screen.buttons['Skin2Laser'].grayed_out = False
 
     def modi_event(self):
         modi = [i for i in self.modi]
@@ -435,50 +435,38 @@ class Button:
         self.text = times[times.index(self.text) - 1]
 
 class ImageButton(Button):
-    def __init__(self, images, *kwargs):
+    def __init__(self, images, is_player1, is_player_skin, *kwargs):
         Button.__init__(self, *kwargs)
         self.images = images
+        self.indices = list(images.keys())
         self.image_index = 0
-        self.image_sizes = tuple((i.get_width(), i.get_height()) for i in self.images)
-        self.real_image_sizes = tuple((self.size[0], self.size[0] * sz[0] / sz[1]) if sz[0] > sz[1] else () for sz in self.image_sizes)
+        self.image_sizes = tuple((i.get_width(), i.get_height()) for i in self.images.values())
+        self.real_image_sizes = tuple((self.size[0], self.size[0] * sz[0] / sz[1]) if sz[0] > sz[1] else (self.size[1] * sz[0] / sz[1], self.size[1]) for sz in self.image_sizes)
         self.event = self.switch
+        self.is_player1, self.is_player_skin = is_player1, is_player_skin
 
     def switch(self):
         self.image_index = (self.image_index + 1) % len(self.images)
+        if self.is_player1:
+            if self.is_player_skin:
+                Settings.player1_skin = self.indices[self.image_index]
+            else:
+                Settings.player1_laser = self.indices[self.image_index]
+        else:
+            if self.is_player_skin:
+                Settings.player2_skin = self.indices[self.image_index]
+            else:
+                Settings.player2_laser = self.indices[self.image_index]
 
     def draw(self, canvas):
         Button.draw(self, canvas)
         image_size = self.image_sizes[self.image_index]
         real_image_size = self.real_image_sizes[self.image_index]
-        print(self.image_index, image_size, real_image_size)
-        canvas.draw_image(self.images[self.image_index], (image_size[0] // 2, image_size[1] // 2), image_size, (self.pos[0] + real_image_size[0] / 2, self.pos[1] + real_image_size[1] / 2), real_image_size)
-
-class SkinButton(Button):
-    def __init__(self, *kwargs):
-        Button.__init__(self, *kwargs)
-        # Playerskin
-        self.pskin_button = ImageButton(
-            tuple(Resources.images[i] for i in SpaceAttack.player_names),
-            (self.rel_pos[0] + self.rel_size[0] * .4, self.rel_pos[1]),
-            (self.rel_size[0] * .2, self.rel_size[1]),
-            '', self.screen, self.grayed_out)
-        self.pskin_button.border = False
-        self.pskin_button.pos = self.pskin_button.pos[0], self.pskin_button.pos[1] + 1
-        self.pskin_button.size = self.pskin_button.size[0], self.pskin_button.size[1] - 2
-        # Laserskin
-        self.lskin_button = ImageButton(
-            tuple(Resources.images[i] for i in SpaceAttack.laser_names),
-            (self.rel_pos[0] + self.rel_size[0] * .7, self.rel_pos[1]),
-            (self.rel_size[0] * .2, self.rel_size[1]),
-            '', self.screen, self.grayed_out)
-        self.lskin_button.pos = self.lskin_button.pos[0], self.lskin_button.pos[1] + 1
-        self.lskin_button.size = self.lskin_button.size[0], self.lskin_button.size[1] - 2
-        self.lskin_button.border = False
-
-    def draw(self, canvas):
-        Button.draw(self, canvas)
-        self.pskin_button.draw(canvas)
-        self.lskin_button.draw(canvas)
+        canvas.draw_image(self.images[self.indices[self.image_index]],
+            (image_size[0] // 2, image_size[1] // 2),
+            image_size,
+            (self.pos[0] + self.size[0] / 2, self.pos[1] + self.size[1] / 2),
+            (real_image_size[0] - 5, real_image_size[1] - 5))
 
 class TitleScreen:
     def __init__(self):
@@ -488,18 +476,28 @@ class TitleScreen:
         self.bg_sz = self.bg_img.get_width(), self.bg_img.get_height()
         if self.bg_sz == (0, 0):
             print('Yo, eins scheiser dreggs Fehla... :/')
+        player_images = dict()
+        laser_images = dict()
+        for i in SpaceAttack.player_names:
+            player_images[i] = Resources.images[i]
+        for i in SpaceAttack.laser_names:
+            laser_images[i] = Resources.images[i]
         self.buttons = {
             'Player_count' : Button((.1, .4), (.35, .1), '1 Player', self),
             'Modi' : Button((.1, .55), (.35, .1), Button.modi[-1], self),
             'Begin' : Button((.1, .7), (.35, .1), 'Begin', self),
             'Exit' : Button((.1, .85), (.35, .1), 'Exit', self),
-            'Skin1' : SkinButton((.55, .4), (.35, .1), 'Player 1', self),
-            'Skin2' : SkinButton((.55, .55), (.35, .1), 'Player 2', self),
+            'Skin1' : Button((.55, .4), (.35, .1), 'Player 1', self),
+            'Skin2' : Button((.55, .55), (.35, .1), 'Player 2', self),
+            'Skin1Player' : ImageButton(player_images, True, True, (.70, .4), (.1, .1), '', self),
+            'Skin1Laser' : ImageButton(laser_images, True, False, (.80, .4), (.1, .1), '', self),
+            'Skin2Player' : ImageButton(player_images, False, True, (.70, .55), (.1, .1), '', self),
+            'Skin2Laser' : ImageButton(laser_images, False, False, (.80, .55), (.1, .1), '', self),
             'Time' : Button((.55, .7), (.35, .1), 'Time: 1min', self)
         }
         self.buttons['Skin2'].grayed_out = True
-        self.buttons['Skin2'].pskin_button.grayed_out = True
-        self.buttons['Skin2'].lskin_button.grayed_out = True
+        self.buttons['Skin2Player'].grayed_out = True
+        self.buttons['Skin2Laser'].grayed_out = True
         self.buttons['Player_count'].event = self.buttons['Player_count'].single_multiplayer_event
         self.buttons['Modi'].event = self.buttons['Modi'].modi_event
         self.buttons['Begin'].event = self.buttons['Begin'].start
