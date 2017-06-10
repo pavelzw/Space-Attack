@@ -19,6 +19,10 @@ class Settings:
     growth_max_limit = 1000
     growth_min_limit = 200
     growth_const = 0.06
+    player1_laser = 'Laser1'
+    player2_laser = 'Laser1'
+    player1_skin = 'Player1'
+    player2_skin = 'Player1'
 
 class Resources:
     image_urls = {
@@ -55,10 +59,10 @@ class Resources:
         'Player4' : 'http://i.imgur.com/HhkyvKd.png',
         'Player5' : 'http://i.imgur.com/29Xwkl3.png',
 
-        'Laser' : 'http://i.imgur.com/kbOI4iJ.png',
-        'Laser1v2' : 'http://i.imgur.com/tM4jjKs.png',
-        'Laser1v3' : 'http://i.imgur.com/xnauZwI.png',
-        'Laser2v1' : 'http://i.imgur.com/kccijdx.png',
+        'Laser1' : 'http://i.imgur.com/kbOI4iJ.png',
+        'Laser2' : 'http://i.imgur.com/tM4jjKs.png',
+        'Laser3' : 'http://i.imgur.com/xnauZwI.png',
+        'Laser4' : 'http://i.imgur.com/kccijdx.png',
 
         'title image' : 'https://i.ytimg.com/vi/FBeYD7yFWxE/maxresdefault.jpg'
     }
@@ -137,8 +141,8 @@ class Enemy(Sprite):
         self.pos = self.pos[0] + self.v * vec[0], self.pos[1] + self.v * vec[1]
 
 class Laser(Sprite):
-    def __init__(self, is_left):
-        Sprite.__init__(self, 'Laser',
+    def __init__(self, is_left, skin_name):
+        Sprite.__init__(self, skin_name,
             visible=False, scale=Settings.laser_scale)
         self.rotation = 0
         self.is_left = is_left
@@ -181,6 +185,7 @@ class Player(PlayerSprite):
         self.score = 0
         self.invincible_counter = 0
         self.invincible_max = Settings.player_invulnerability_time
+        self.laser_skin = Settings.player2_laser if player_number else Settings.player1_laser
         self.mov_vec = 0, 0
 
     def turn(self, direction):
@@ -191,7 +196,7 @@ class Player(PlayerSprite):
 
     def shoot(self):
         if not self.cooldown:
-            laser_pair = Laser(True), Laser(False)
+            laser_pair = Laser(True, laser_skin), Laser(False, laser_skin)
             n = -sin(self.rotation - pi / 2), cos(self.rotation - pi / 2)
             d = n[0] * Settings.laser_distance, n[1] * Settings.laser_distance
             laser_pair[0].shoot((self.pos[0] + d[0], self.pos[1] + d[1]), self.rotation)
@@ -236,6 +241,7 @@ class SpaceAttack:
         'Monster8', 'Monster9']
 
     player_names = ['Player1', 'Player2', 'Player3', 'Player4', 'Player5']
+    laser_names = ['Laser1', 'Laser2', 'Laser3', 'Laser4']
     background_names = ['Background1', 'Background2']
 
     def __init__(self, size):
@@ -369,7 +375,7 @@ class SpaceAttack:
             self.limit = Settings.growth_min_limit + (Settings.growth_max_limit - Settings.growth_min_limit) * exp(-self.enemy_counter * Settings.growth_const)
             self.spawncount = self.limit
 
-class Button(object):
+class Button:
     modi = ('Hardmode', 'Classic 10 Lifes', 'Classic 5 Lifes', 'Classic 3 Lifes', 'Time')
 
     def __init__(self, pos, size, text, screen, grayed_out=False):
@@ -429,19 +435,42 @@ class Button(object):
         self.text = times[times.index(self.text) - 1]
 
 class ImageButton(Button):
-    def __init__(self, *kwargs):
+    def __init__(self, images, *kwargs):
         Button.__init__(self, *kwargs)
+        self.images = images
+        self.image_index = 0
+        self.image_sizes = tuple((i.get_width(), i.get_height()) for i in self.images)
+        self.real_image_sizes = tuple((self.size[0], self.size[0] * sz[0] / sz[1]) if sz[0] > sz[1] else () for sz in self.image_sizes)
+        self.event = self.switch
+
+    def switch(self):
+        self.image_index = (self.image_index + 1) % len(self.images)
+
+    def draw(self, canvas):
+        Button.draw(self, canvas)
+        image_size = self.image_sizes[self.image_index]
+        real_image_size = self.real_image_sizes[self.image_index]
+        print(self.image_index, image_size, real_image_size)
+        canvas.draw_image(self.images[self.image_index], (image_size[0] // 2, image_size[1] // 2), image_size, (self.pos[0] + real_image_size[0] / 2, self.pos[1] + real_image_size[1] / 2), real_image_size)
 
 class SkinButton(Button):
     def __init__(self, *kwargs):
         Button.__init__(self, *kwargs)
         # Playerskin
-        self.pskin_button = Button((self.rel_pos[0] + self.rel_size[0] * .4, self.rel_pos[1]), (self.rel_size[0] * .2, self.rel_size[1]), 'P', self.screen, self.grayed_out)
+        self.pskin_button = ImageButton(
+            tuple(Resources.images[i] for i in SpaceAttack.player_names),
+            (self.rel_pos[0] + self.rel_size[0] * .4, self.rel_pos[1]),
+            (self.rel_size[0] * .2, self.rel_size[1]),
+            '', self.screen, self.grayed_out)
         self.pskin_button.border = False
         self.pskin_button.pos = self.pskin_button.pos[0], self.pskin_button.pos[1] + 1
         self.pskin_button.size = self.pskin_button.size[0], self.pskin_button.size[1] - 2
         # Laserskin
-        self.lskin_button = Button((self.rel_pos[0] + self.rel_size[0] * .7, self.rel_pos[1]), (self.rel_size[0] * .2, self.rel_size[1]), 'L', self.screen, self.grayed_out)
+        self.lskin_button = ImageButton(
+            tuple(Resources.images[i] for i in SpaceAttack.laser_names),
+            (self.rel_pos[0] + self.rel_size[0] * .7, self.rel_pos[1]),
+            (self.rel_size[0] * .2, self.rel_size[1]),
+            '', self.screen, self.grayed_out)
         self.lskin_button.pos = self.lskin_button.pos[0], self.lskin_button.pos[1] + 1
         self.lskin_button.size = self.lskin_button.size[0], self.lskin_button.size[1] - 2
         self.lskin_button.border = False
