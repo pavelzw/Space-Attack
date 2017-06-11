@@ -23,6 +23,11 @@ class Settings:
     player2_laser = 'Laser1'
     player1_skin = 'Player1'
     player2_skin = 'Player1'
+    modi = ('Hardmode', 'Classic 10 Lifes', 'Classic 5 Lifes', 'Classic 3 Lifes', 'Time')
+    blue = '#0d36e3'
+    red = '#d01306'
+    modus = modi[-1]
+    has_lifes = False
 
 class Resources:
     image_urls = {
@@ -187,6 +192,18 @@ class Player(PlayerSprite):
         self.invincible_max = Settings.player_invulnerability_time
         self.laser_skin = Settings.player2_laser if player_number else Settings.player1_laser
         self.mov_vec = 0, 0
+        if Settings.has_lifes:
+            if Settings.modus == 'Hardmode':
+                self.lifes = 1
+            elif Settings.modus == 'Classic 10 Lifes':
+                self.lifes = 10
+            elif Settings.modus == 'Classic 5 Lifes':
+                self.lifes = 5
+            elif Settings.modus == 'Classic 3 Lifes':
+                self.lifes = 3
+            self.life_radius = min(Settings.resolution) / 80
+            if not self.life_radius:
+                self.life_radius = 1
 
     def turn(self, direction):
         if direction == Player.left:
@@ -206,7 +223,10 @@ class Player(PlayerSprite):
 
     def get_hit(self):
         if self.invincible_counter <= 0:
-            self.score = int(self.score * Settings.player_subtraction)
+            if Settings.has_lifes:
+                self.lifes -= 1
+            else:
+                self.score = int(self.score * Settings.player_subtraction)
             self.invincible_counter = self.invincible_max
 
     def update(self):
@@ -229,6 +249,16 @@ class Player(PlayerSprite):
                     self.lasers[num] = (self.lasers[num][1],)
             elif len(laserpair) > 1 and not laserpair[1].is_valid():
                 self.lasers[num] = (self.lasers[num][0],)
+    def draw(self, canvas):
+        Sprite.draw(self, canvas)
+        if Settings.has_lifes:
+            radius = self.life_radius
+            if self.num:
+                for life in range(self.lifes):
+                    canvas.draw_circle((Settings.resolution[0] - (life + 1) * (radius + 5) * 2 - radius, 3 * radius), radius, 1, '#cdcdcd', Settings.blue)
+            else:
+                for life in range(self.lifes):
+                    canvas.draw_circle(((life + 1) * (radius + 5) * 2 + radius, 3 * radius), radius, 1, '#cdcdcd', Settings.red)
 
 class SpaceAttack:
     spawncount = 0
@@ -258,9 +288,9 @@ class SpaceAttack:
 
     def load_players(self):
         self.sprites['Player1'] = Player(0)
-        self.sprites['Player1'].pos = (self.size[0] / 2, self.size[1] / 2)
+        self.sprites['Player1'].pos = (self.size[0] * 1 / 3, self.size[1] / 2)
         self.sprites['Player2'] = Player(1)
-        self.sprites['Player2'].pos = (self.size[0] / 2, self.size[1] / 2)
+        self.sprites['Player2'].pos = (self.size[0] * 2 / 3, self.size[1] / 2)
 
     def start(self):
         self.running = True
@@ -336,8 +366,8 @@ class SpaceAttack:
                 laserpair[0].draw(canvas)
                 if len(laserpair) > 1:
                     laserpair[1].draw(canvas)
-            canvas.draw_text(str(self.sprites['Player1'].score), (Settings.resolution[0] * 0.5 - 100, 40), 30, 'Red', 'sans-serif')
-            canvas.draw_text(str(self.sprites['Player2'].score), (Settings.resolution[0] * 0.5 + 100, 40), 30, 'Blue', 'sans-serif')
+            canvas.draw_text(str(self.sprites['Player1'].score), (Settings.resolution[0] * 0.5 - 100, 40), 30, Settings.red, 'sans-serif')
+            canvas.draw_text(str(self.sprites['Player2'].score), (Settings.resolution[0] * 0.5 + 100, 40), 30, Settings.blue, 'sans-serif')
 
     def keydown_handler(self, key):
         if key == simplegui.KEY_MAP['a']:
@@ -376,7 +406,6 @@ class SpaceAttack:
             self.spawncount = self.limit
 
 class Button:
-    modi = ('Hardmode', 'Classic 10 Lifes', 'Classic 5 Lifes', 'Classic 3 Lifes', 'Time')
 
     def __init__(self, pos, size, text, screen, grayed_out=False):
         self.rel_pos = pos
@@ -417,15 +446,18 @@ class Button:
             self.screen.buttons['Skin2Laser'].grayed_out = False
 
     def modi_event(self):
-        modi = [i for i in self.modi]
+        modi = [i for i in Settings.modi]
         # Classic: Highscore
         # Time: Highscore mit Timer
         # Hardmode: Highscore, nur 1 Leben
         self.text = modi[modi.index(self.text) - 1]
         if self.text in ('Classic 10 Lifes', 'Classic 5 Lifes', 'Classic 3 Lifes', 'Hardmode'):
             self.screen.buttons['Time'].grayed_out = True
+            Settings.has_lifes = True
         elif self.text in ('Time',):
             self.screen.buttons['Time'].grayed_out = False
+            Settings.has_lifes = False
+        Settings.modus = self.text
 
     def start(self):
         window.start_game()
@@ -485,7 +517,7 @@ class TitleScreen:
             laser_images[i] = Resources.images[i]
         self.buttons = {
             'Player_count' : Button((.1, .4), (.35, .1), '1 Player', self),
-            'Modi' : Button((.1, .55), (.35, .1), Button.modi[-1], self),
+            'Modi' : Button((.1, .55), (.35, .1), Settings.modi[-1], self),
             'Begin' : Button((.1, .7), (.35, .1), 'Begin', self),
             'Exit' : Button((.1, .85), (.35, .1), 'Exit', self),
             'Skin1' : Button((.55, .4), (.35, .1), 'Player 1', self),
