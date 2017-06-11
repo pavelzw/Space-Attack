@@ -129,14 +129,16 @@ class Enemy(Sprite):
 
     def move(self):
         # Wurzel braucht man nicht
-        vec = self.targets[0].pos[0] - self.pos[0], self.targets[0].pos[1] - self.pos[1]
-        min_dist = vec[0] * vec[0] + vec[1] * vec[1]
+        min_dist = None
         min_dist_index = 0
+
         for index, target in enumerate(self.targets[1:]):
+            if not target.alive:
+                continue
             index += 1
             vec = target.pos[0] - self.pos[0], target.pos[1] - self.pos[1]
             dist = vec[0] * vec[0] + vec[1] * vec[1]
-            if dist < min_dist:
+            if min_dist is None or dist < min_dist:
                 min_dist = dist
                 min_dist_index = index
         target = self.targets[min_dist_index].pos
@@ -191,6 +193,7 @@ class Player(PlayerSprite):
         self.invincible_counter = 0
         self.invincible_max = Settings.player_invulnerability_time
         self.laser_skin = Settings.player2_laser if player_number else Settings.player1_laser
+        self.alive = True
         self.mov_vec = 0, 0
         if Settings.has_lifes:
             if Settings.modus == 'Hardmode':
@@ -212,7 +215,7 @@ class Player(PlayerSprite):
             self.rotation += self.rot_speed
 
     def shoot(self):
-        if not self.cooldown:
+        if not self.cooldown and self.alive:
             laser_pair = Laser(True, self.laser_skin), Laser(False, self.laser_skin)
             n = -sin(self.rotation - pi / 2), cos(self.rotation - pi / 2)
             d = n[0] * Settings.laser_distance, n[1] * Settings.laser_distance
@@ -225,6 +228,8 @@ class Player(PlayerSprite):
         if self.invincible_counter <= 0:
             if Settings.has_lifes:
                 self.lifes -= 1
+                if not self.lifes:
+                    self.alive = False
             else:
                 self.score = int(self.score * Settings.player_subtraction)
             self.invincible_counter = self.invincible_max
@@ -250,7 +255,6 @@ class Player(PlayerSprite):
             elif len(laserpair) > 1 and not laserpair[1].is_valid():
                 self.lasers[num] = (self.lasers[num][0],)
     def draw(self, canvas):
-        Sprite.draw(self, canvas)
         if Settings.has_lifes:
             radius = self.life_radius
             if self.num:
@@ -259,6 +263,8 @@ class Player(PlayerSprite):
             else:
                 for life in range(self.lifes):
                     canvas.draw_circle(((life + 1) * (radius + 5) * 2 + radius, 3 * radius), radius, 1, '#cdcdcd', Settings.red)
+        if self.alive:
+            Sprite.draw(self, canvas)
 
 class SpaceAttack:
     spawncount = 0
@@ -300,7 +306,11 @@ class SpaceAttack:
         if self.running:
             for name, sprite in self.sprites.items():
                 sprite.update()
-            for player in ('Player1', 'Player2'):
+            alive_players = []
+            for i in ('Player1', 'Player2'):
+                if self.sprites[i].alive:
+                    alive_players.append(i)
+            for player in alive_players:
                 player_sprite = self.sprites[player]
                 for num, laserpair in enumerate(player_sprite.lasers):
                     if not laserpair:
