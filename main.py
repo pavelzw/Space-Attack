@@ -287,6 +287,7 @@ class SpaceAttack:
         self.load_players()
         self.running = False
         self.enemy_counter = 0
+        self.any_alive = True
 
     def load_background(self):
         self.background_name = random.choice(self.__class__.background_names)
@@ -310,7 +311,9 @@ class SpaceAttack:
             for i in ('Player1', 'Player2'):
                 if self.sprites[i].alive:
                     alive_players.append(i)
+            self.any_alive = False
             for player in alive_players:
+                self.any_alive = True
                 player_sprite = self.sprites[player]
                 for num, laserpair in enumerate(player_sprite.lasers):
                     if not laserpair:
@@ -376,8 +379,20 @@ class SpaceAttack:
                 laserpair[0].draw(canvas)
                 if len(laserpair) > 1:
                     laserpair[1].draw(canvas)
-            canvas.draw_text(str(self.sprites['Player1'].score), (Settings.resolution[0] * 0.5 - 100, 40), 30, Settings.red, 'sans-serif')
-            canvas.draw_text(str(self.sprites['Player2'].score), (Settings.resolution[0] * 0.5 + 100, 40), 30, Settings.blue, 'sans-serif')
+            p1score = self.sprites['Player1'].score
+            p2score = self.sprites['Player2'].score
+            if not self.any_alive:
+                canvas.draw_text(str(p1score), (Settings.resolution[0] * 0.5 - 300, 130), 120, Settings.red, 'sans-serif')
+                canvas.draw_text(str(p2score), (Settings.resolution[0] * 0.5 + 300, 130), 120, Settings.blue, 'sans-serif')
+                if p1score > p2score:
+                    canvas.draw_text('Player 1 won the game!', (Settings.resolution[0] * 0.5 - 380, Settings.resolution[1] // 2), 70, '#aaaabb', 'sans-serif')
+                elif p1score < p2score:
+                    canvas.draw_text('Player 2 won the game!', (Settings.resolution[0] * 0.5 - 380, Settings.resolution[1] // 2), 70, '#aaaabb', 'sans-serif')
+                elif p1score == p2score:
+                    canvas.draw_text('draw', (Settings.resolution[0] * 0.5 - 50, Settings.resolution[1] // 2), 70, '#aaaabb', 'sans-serif')
+            else:
+                canvas.draw_text(str(p1score), (Settings.resolution[0] * 0.5 - 100, 40), 30, Settings.red, 'sans-serif')
+                canvas.draw_text(str(p2score), (Settings.resolution[0] * 0.5 + 100, 40), 30, Settings.blue, 'sans-serif')
 
     def keydown_handler(self, key):
         if key == simplegui.KEY_MAP['a']:
@@ -579,6 +594,8 @@ class Window:
         self.frame.set_draw_handler(self.game.draw)
         self.frame.set_keydown_handler(self.game.keydown_handler)
         self.frame.set_keyup_handler(self.game.keyup_handler)
+        # lambda: leere Funktion, die nix macht
+        self.frame.set_mouseclick_handler(lambda pos:None)
         self.timer.start()
         self.game.start()
 
