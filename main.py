@@ -132,10 +132,9 @@ class Enemy(Sprite):
         min_dist = None
         min_dist_index = 0
 
-        for index, target in enumerate(self.targets[1:]):
+        for index, target in enumerate(self.targets):
             if not target.alive:
                 continue
-            index += 1
             vec = target.pos[0] - self.pos[0], target.pos[1] - self.pos[1]
             dist = vec[0] * vec[0] + vec[1] * vec[1]
             if min_dist is None or dist < min_dist:
@@ -374,7 +373,8 @@ class SpaceAttack:
         if self.running:
             self.background_sprite.draw(canvas)
             for name, sprite in self.sprites.items():
-                sprite.draw(canvas)
+                if self.any_alive:
+                    sprite.draw(canvas)
             for laserpair in self.sprites['Player1'].lasers + self.sprites['Player2'].lasers:
                 laserpair[0].draw(canvas)
                 if len(laserpair) > 1:
