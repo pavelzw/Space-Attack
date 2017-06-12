@@ -1,6 +1,7 @@
 from math import pi, sin, cos, sqrt, exp
 import random
 import simplegui
+import time
 
 class Settings:
     resolution = 1152, 648 # 3/5 von Full HD
@@ -28,6 +29,8 @@ class Settings:
     red = '#d01306'
     modus = modi[-1]
     has_lifes = False
+    is_time_mode = True
+    max_time = 60
 
 class Resources:
     image_urls = {
@@ -229,12 +232,15 @@ class Player(PlayerSprite):
             if Settings.has_lifes:
                 self.lifes -= 1
                 if not self.lifes:
-                    self.alive = False
-                    for laser in self.laser_pair:
-                        laser.visible = False
+                    self.die()
             else:
                 self.score = int(self.score * Settings.player_subtraction)
             self.invincible_counter = self.invincible_max
+
+    def die(self):
+        self.alive = False
+        for laser in self.laser_pair:
+            laser.visible = False
 
     def update(self):
         if self.invincible_counter > 0:
@@ -303,6 +309,7 @@ class SpaceAttack:
 
     def start(self):
         self.running = True
+        self.timer = time.time()
 
     def update(self):
         self.spawncounter()
@@ -371,6 +378,9 @@ class SpaceAttack:
                             ppos[1] < epos[1] + esize[1] and
                             ppos[1] + psize[1] > epos[1]):
                                 player_sprite.get_hit()
+                if time.time() >= Settings.max_time + self.timer:
+                    self.sprites['Player1'].die()
+                    self.sprites['Player2'].die()
 
     def draw(self, canvas):
         if self.running:
@@ -396,6 +406,8 @@ class SpaceAttack:
             else:
                 canvas.draw_text(str(p1score), (Settings.resolution[0] * 0.5 - 100, 40), 30, Settings.red, 'sans-serif')
                 canvas.draw_text(str(p2score), (Settings.resolution[0] * 0.5 + 100, 40), 30, Settings.blue, 'sans-serif')
+            if Settings.is_time_mode and self.sprites['Player1'].alive and self.sprites['Player2'].alive:
+                canvas.draw_text(str(int(round(Settings.max_time - time.time() + self.timer))), (5, 45), 40, '#eeeeff', 'sans-serif')
 
     def keydown_handler(self, key):
         if key == simplegui.KEY_MAP['a']:
@@ -482,9 +494,11 @@ class Button:
         if self.text in ('Classic 10 Lifes', 'Classic 5 Lifes', 'Classic 3 Lifes', 'Hardmode'):
             self.screen.buttons['Time'].grayed_out = True
             Settings.has_lifes = True
+            Settings.is_time_mode = False
         elif self.text in ('Time',):
             self.screen.buttons['Time'].grayed_out = False
             Settings.has_lifes = False
+            Settings.is_time_mode = True
         Settings.modus = self.text
 
     def start(self):
@@ -493,6 +507,7 @@ class Button:
     def time_event(self):
         times = ['Time: ' + str(i) + 'min' for i in (10, 5, 2, 1)]
         self.text = times[times.index(self.text) - 1]
+        Settings.max_time = int(self.text[6:-3]) * 60
 
 class ImageButton(Button):
     def __init__(self, images, is_player1, is_player_skin, *kwargs):
