@@ -194,6 +194,7 @@ class Player(PlayerSprite):
         self.laser_skin = Settings.player2_laser if player_number else Settings.player1_laser
         self.alive = True
         self.mov_vec = 0, 0
+        self.laser_pair = ()
         if Settings.has_lifes:
             if Settings.modus == 'Hardmode':
                 self.lifes = 1
@@ -215,12 +216,12 @@ class Player(PlayerSprite):
 
     def shoot(self):
         if not self.cooldown and self.alive:
-            laser_pair = Laser(True, self.laser_skin), Laser(False, self.laser_skin)
+            self.laser_pair = Laser(True, self.laser_skin), Laser(False, self.laser_skin)
             n = -sin(self.rotation - pi / 2), cos(self.rotation - pi / 2)
             d = n[0] * Settings.laser_distance, n[1] * Settings.laser_distance
-            laser_pair[0].shoot((self.pos[0] + d[0], self.pos[1] + d[1]), self.rotation)
-            laser_pair[1].shoot((self.pos[0] - d[0], self.pos[1] - d[1]), self.rotation)
-            self.lasers.append(laser_pair)
+            self.laser_pair[0].shoot((self.pos[0] + d[0], self.pos[1] + d[1]), self.rotation)
+            self.laser_pair[1].shoot((self.pos[0] - d[0], self.pos[1] - d[1]), self.rotation)
+            self.lasers.append(self.laser_pair)
             self.cooldown = self.max_cooldown
 
     def get_hit(self):
@@ -229,6 +230,8 @@ class Player(PlayerSprite):
                 self.lifes -= 1
                 if not self.lifes:
                     self.alive = False
+                    for laser in self.laser_pair:
+                        laser.visible = False
             else:
                 self.score = int(self.score * Settings.player_subtraction)
             self.invincible_counter = self.invincible_max
