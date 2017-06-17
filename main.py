@@ -97,8 +97,8 @@ class Resources:
                 'Modi' : [Button, (.1, .55), (.35, .1), Settings.modus, Button.modi_event, False],
                 'Begin' : [Button, (.1, .7), (.35, .1), 'Begin', Button.start, False],
                 'Exit' : [Button, (.1, .85), (.35, .1), 'Exit', exit, False],
-                'Skin1' : [Button, (.55, .4), (.35, .1), 'Player 1', None, False],
-                'Skin2' : [Button, (.55, .55), (.35, .1), 'Player 2', None, False],
+                'Skin1' : [Button, (.55, .4), (.35, .1), 'Player 1', Button.event, False],
+                'Skin2' : [Button, (.55, .55), (.35, .1), 'Player 2', Button.event, False],
                 'Skin1Player' : [ImageButton, True, True, (.70, .4), (.1, .1), ImageButton.switch, player_images, False],
                 'Skin1Laser' : [ImageButton, True, False, (.80, .4), (.1, .1), ImageButton.switch, laser_images, False],
                 'Skin2Player' : [ImageButton, False, True, (.70, .55), (.1, .1), ImageButton.switch, player_images, False],
@@ -110,7 +110,7 @@ class Resources:
                 Resources.button_sets[name]['Skin2'][-1] = True
                 Resources.button_sets[name]['Skin2Player'][-1] = True
                 Resources.button_sets[name]['Skin2Laser'][-1] = True
-            if Resources.button_sets[name]['Time'][3] != 'Time':
+            if Resources.button_sets[name]['Modi'][3] != 'Time':
                 Resources.button_sets[name]['Time'][-1] = True
         elif name == 'adv_settings':
             Resources.button_sets[name] = {
@@ -129,7 +129,7 @@ class Sprite:
         self.image = Resources.images[self.type]
         self.size = self.image.get_width(), self.image.get_height()
         if self.size == (0, 0): # simplegui Bug, nicht vom Spiel
-            print('Yo, schon wieder... :\'(')
+            print('SimpleGUI-Fehler')
         self.scale = scale
         self.rl_size = Settings.resolution[1] * scale * self.size[0] / self.size[1], Settings.resolution[1] * self.scale
         self.center = self.size[0] // 2, self.size[1] // 2
@@ -548,6 +548,7 @@ class Button:
         times = ['Time: ' + str(i) + 'min' for i in (10, 5, 2, 1)]
         self.text = times[times.index(self.text) - 1]
         Settings.max_time = int(self.text[6:-3]) * 60
+
     def adv_back_event(self):
         self.screen.init_buttons()
 
@@ -608,7 +609,14 @@ class ButtonSet:
     def onclick(self, pos):
         for button in self.buttons.values():
             if (not button.grayed_out) and button.point_collision(pos):
-                button.event()
+                #print(button)
+                if button.__class__ == Button: # KOMISCHER FEHLER
+                    button.event(button)
+                    #print('Normalerbutton klappt')
+                elif button.__class__ == ImageButton:
+                    button.event()
+                    #print('Imgbutton klappt')
+
     def draw(self, canvas):
         for button in self.buttons.values():
             button.draw(canvas)
@@ -620,12 +628,11 @@ class TitleScreen:
         self.bg_img = Resources.images[random.choice(SpaceAttack.background_names)]
         self.bg_sz = self.bg_img.get_width(), self.bg_img.get_height()
         if self.bg_sz == (0, 0):
-            print('Yo, eins scheiser dreggs Fehla... :/')
+            print('SimpleGUI-Fehler')
         self.init_buttons()
 
     def init_buttons(self):
         Resources.load_buttons('main_menu')
-        Resources.load_buttons('adv_settings')
         self.button_set = ButtonSet('main_menu')
 
     def keydown_handler(self, key):
@@ -633,7 +640,7 @@ class TitleScreen:
             exit(0)
 
     def mouseclick_handler(self, pos):
-        pass
+        self.button_set.onclick(pos)
 
     def draw(self, canvas):
         canvas.draw_image(self.bg_img, (self.bg_sz[0] / 2, self.bg_sz[1] / 2), self.bg_sz, (Settings.resolution[0] / 2, Settings.resolution[1] / 2), Settings.resolution)
@@ -646,10 +653,10 @@ class Window:
         self.frame.start()
 
     def start_title_screen(self):
-        self.title_screen = TitleScreen()
-        self.frame.set_draw_handler(self.title_screen.draw)
-        self.frame.set_keydown_handler(self.title_screen.keydown_handler)
-        self.frame.set_mouseclick_handler(self.title_screen.mouseclick_handler)
+        self.game = TitleScreen()
+        self.frame.set_draw_handler(self.game.draw)
+        self.frame.set_keydown_handler(self.game.keydown_handler)
+        self.frame.set_mouseclick_handler(self.game.mouseclick_handler)
 
     def start_game(self):
         self.game = SpaceAttack(Settings.resolution)
