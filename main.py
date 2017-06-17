@@ -85,20 +85,26 @@ class Resources:
             Resources.images[name] = simplegui.load_image(url)
 
     def load_buttons(name):
+        player_images = dict()
+        laser_images = dict()
+        for i in SpaceAttack.player_names:
+            player_images[i] = Resources.images[i]
+        for i in SpaceAttack.laser_names:
+            laser_images[i] = Resources.images[i]
         if name == 'main_menu':
             Resources.button_sets[name] = {
-                'Player_count' : (Button, (.1, .4), (.35, .1), '2 Players' if Settings.is_2_players else '1 Player', Button.single_multiplayer_event, False),
-                'Modi' : (Button, (.1, .55), (.35, .1), Settings.modus, Button.modi_event, False),
-                'Begin' : (Button, (.1, .7), (.35, .1), 'Begin', Button.start, False),
-                'Exit' : (Button, (.1, .85), (.35, .1), 'Exit', exit, False),
-                'Skin1' : (Button, (.55, .4), (.35, .1), 'Player 1', None, False),
-                'Skin2' : (Button, (.55, .55), (.35, .1), 'Player 2', None, False),
-                'Skin1Player' : (ImageButton, True, True, (.70, .4), (.1, .1), ImageButton.switch, player_images, False),
-                'Skin1Laser' : (ImageButton, True, False, (.80, .4), (.1, .1), ImageButton.switch, laser_images, False),
-                'Skin2Player' : (ImageButton, False, True, (.70, .55), (.1, .1), ImageButton.switch, player_images, False),
-                'Skin2Laser' : (ImageButton, False, False, (.80, .55), (.1, .1), ImageButton.switch, laser_images, False),
-                'Time' : (Button, (.55, .7), (.35, .1), 'Time: %imin' % (Settings.max_time // 60), Button.time_event, False),
-                'adv. settings' : (Button, (.55, .85), (.35, .1), 'Advanced Settings', Button.adv_settings_event, False)
+                'Player_count' : [Button, (.1, .4), (.35, .1), '2 Players' if Settings.is_2_players else '1 Player', Button.single_multiplayer_event, False],
+                'Modi' : [Button, (.1, .55), (.35, .1), Settings.modus, Button.modi_event, False],
+                'Begin' : [Button, (.1, .7), (.35, .1), 'Begin', Button.start, False],
+                'Exit' : [Button, (.1, .85), (.35, .1), 'Exit', exit, False],
+                'Skin1' : [Button, (.55, .4), (.35, .1), 'Player 1', None, False],
+                'Skin2' : [Button, (.55, .55), (.35, .1), 'Player 2', None, False],
+                'Skin1Player' : [ImageButton, True, True, (.70, .4), (.1, .1), ImageButton.switch, player_images, False],
+                'Skin1Laser' : [ImageButton, True, False, (.80, .4), (.1, .1), ImageButton.switch, laser_images, False],
+                'Skin2Player' : [ImageButton, False, True, (.70, .55), (.1, .1), ImageButton.switch, player_images, False],
+                'Skin2Laser' : [ImageButton, False, False, (.80, .55), (.1, .1), ImageButton.switch, laser_images, False],
+                'Time' : [Button, (.55, .7), (.35, .1), 'Time: %imin' % (Settings.max_time // 60), Button.time_event, False],
+                'adv. settings' : [Button, (.55, .85), (.35, .1), 'Advanced Settings', Button.adv_settings_event, False]
             }
             if Resources.button_sets[name]['Player_count'][3] == '1 Player':
                 Resources.button_sets[name]['Skin2'][-1] = True
@@ -113,6 +119,8 @@ class Resources:
                 'controls' : (Button, (.1, .7), (.8, .1), 'Controls', None),
                 'back' : (Button, (.1, .85), (.8, .1), 'Back', Button.adv_back_event),
             }
+        else:
+            raise KeyError('the menu key "%s" is not present' % name)
 
 class Sprite:
     def __init__(self, type, pos=(0, 0), visible=False, rotation=0, scale=Settings.player_scale):
@@ -590,17 +598,20 @@ class ImageButton(Button):
 class ButtonSet:
     def __init__(self, name):
         self.name = name
-        self.buttons = dic
-        for bname, args in Resources.button_sets.items():
+        self.buttons = dict()
+        for bname, args in Resources.button_sets[name].items():
             if args[0] == Button:
-                self.buttons[bname] = args[0](args[1], args[2], args[3], grayed_out=args[-1], event=args[4])
+                self.buttons[bname] = args[0](args[1], args[2], args[3], self, grayed_out=args[-1], event=args[4])
             elif args[0] == ImageButton:
-                self.buttons[bname] = args[0](args[6], args[1], args[2], args[3], aargs[4], grayed_out=args[-1], event=args[5])
+                self.buttons[bname] = args[0](args[6], args[1], args[2], args[3], args[4], '', self, args[-1], args[5])
 
     def onclick(self, pos):
         for button in self.buttons.values():
             if (not button.grayed_out) and button.point_collision(pos):
                 button.event()
+    def draw(self, canvas):
+        for button in self.buttons.values():
+            button.draw(canvas)
 
 class TitleScreen:
     def __init__(self):
@@ -613,42 +624,9 @@ class TitleScreen:
         self.init_buttons()
 
     def init_buttons(self):
-        player_images = dict()
-        laser_images = dict()
-        for i in SpaceAttack.player_names:
-            player_images[i] = Resources.images[i]
-        for i in SpaceAttack.laser_names:
-            laser_images[i] = Resources.images[i]
-        self.buttons = {
-            'Player_count' : Button((.1, .4), (.35, .1), '2 Players' if Settings.is_2_players else '1 Player', self),
-            'Modi' : Button((.1, .55), (.35, .1), Settings.modus, self),
-            'Begin' : Button((.1, .7), (.35, .1), 'Begin', self),
-            'Exit' : Button((.1, .85), (.35, .1), 'Exit', self),
-            'Skin1' : Button((.55, .4), (.35, .1), 'Player 1', self),
-            'Skin2' : Button((.55, .55), (.35, .1), 'Player 2', self),
-            'Skin1Player' : ImageButton(player_images, True, True, (.70, .4), (.1, .1), '', self),
-            'Skin1Laser' : ImageButton(laser_images, True, False, (.80, .4), (.1, .1), '', self),
-            'Skin2Player' : ImageButton(player_images, False, True, (.70, .55), (.1, .1), '', self),
-            'Skin2Laser' : ImageButton(laser_images, False, False, (.80, .55), (.1, .1), '', self),
-            'Time' : Button((.55, .7), (.35, .1), 'Time: %imin' % (Settings.max_time // 60), self),
-            'adv. settings' : Button((.55, .85), (.35, .1), 'Advanced Settings', self)
-        }
-        self.buttons['Player_count'].event = self.buttons['Player_count'].single_multiplayer_event
-        self.buttons['Modi'].event = self.buttons['Modi'].modi_event
-        self.buttons['Begin'].event = self.buttons['Begin'].start
-        self.buttons['Exit'].event = exit
-        self.buttons['Time'].event = self.buttons['Time'].time_event
-        self.buttons['adv. settings'].event = self.buttons['adv. settings'].adv_settings_event
-        self.buttons['Skin1Player'].image_index = self.buttons['Skin1Player'].indices.index(Settings.player1_skin)
-        self.buttons['Skin2Player'].image_index = self.buttons['Skin2Player'].indices.index(Settings.player2_skin)
-        self.buttons['Skin1Laser'].image_index = self.buttons['Skin1Laser'].indices.index(Settings.player1_laser)
-        self.buttons['Skin2Laser'].image_index = self.buttons['Skin2Laser'].indices.index(Settings.player2_laser)
-        if self.buttons['Player_count'].text == '1 Player':
-            self.buttons['Skin2'].grayed_out = True
-            self.buttons['Skin2Player'].grayed_out = True
-            self.buttons['Skin2Laser'].grayed_out = True
-        if self.buttons['Modi'].text != 'Time':
-            self.buttons['Time'].grayed_out = True
+        Resources.load_buttons('main_menu')
+        Resources.load_buttons('adv_settings')
+        self.button_set = ButtonSet('main_menu')
 
     def keydown_handler(self, key):
         if key == 27:
@@ -660,8 +638,7 @@ class TitleScreen:
     def draw(self, canvas):
         canvas.draw_image(self.bg_img, (self.bg_sz[0] / 2, self.bg_sz[1] / 2), self.bg_sz, (Settings.resolution[0] / 2, Settings.resolution[1] / 2), Settings.resolution)
         canvas.draw_image(self.title_img, (self.title_sz[0] / 2, self.title_sz[1] / 2), self.title_sz, (Settings.resolution[0] / 2, .2 * self.title_sz[1] / 2), (self.title_sz[0] * .3, self.title_sz[1] * .3))
-        for button in self.buttons.values():
-            button.draw(canvas)
+        self.button_set.draw(canvas)
 
 class Window:
     def __init__(self, title='NONE'):
