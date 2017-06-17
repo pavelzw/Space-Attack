@@ -5,6 +5,8 @@ import time
 
 class Settings:
     resolution = 1152, 648 # 3/5 von Full HD
+    blue = '#0d36e3'
+    red = '#d01306'
     player_velocity = 1.5
     player_angular_velocity = pi / 180 # Geschwindigkeit, mit der sich Spieler dreht
     player_scale = .1
@@ -25,13 +27,12 @@ class Settings:
     player1_skin = 'Player1'
     player2_skin = 'Player1'
     modi = ('Hardmode', 'Classic 10 Lifes', 'Classic 5 Lifes', 'Classic 3 Lifes', 'Time')
-    blue = '#0d36e3'
-    red = '#d01306'
     modus = modi[-1]
     has_lifes = False
     is_time_mode = True
     max_time = 60
     is_2_players = True
+    background = 'Background1'
 
 class Resources:
     image_urls = {
@@ -95,10 +96,10 @@ class Resources:
             Resources.button_sets[name] = {
                 'Player_count' : [Button, (.1, .4), (.35, .1), '2 Players' if Settings.is_2_players else '1 Player', Button.single_multiplayer_event, False],
                 'Modi' : [Button, (.1, .55), (.35, .1), Settings.modus, Button.modi_event, False],
-                'Begin' : [Button, (.1, .7), (.35, .1), 'Begin', Button.start, False],
+                'Begin' : [Button, (.1, .7), (.35, .1), 'Begin', Button.start_event, False],
                 'Exit' : [Button, (.1, .85), (.35, .1), 'Exit', exit, False],
-                'Skin1' : [Button, (.55, .4), (.35, .1), 'Player 1', Button.event, False],
-                'Skin2' : [Button, (.55, .55), (.35, .1), 'Player 2', Button.event, False],
+                'Skin1' : [Button, (.55, .4), (.35, .1), 'Player 1', Button.pass_event, False],
+                'Skin2' : [Button, (.55, .55), (.35, .1), 'Player 2', Button.pass_event, False],
                 'Skin1Player' : [ImageButton, True, True, (.70, .4), (.1, .1), ImageButton.switch, player_images, False],
                 'Skin1Laser' : [ImageButton, True, False, (.80, .4), (.1, .1), ImageButton.switch, laser_images, False],
                 'Skin2Player' : [ImageButton, False, True, (.70, .55), (.1, .1), ImageButton.switch, player_images, False],
@@ -114,10 +115,17 @@ class Resources:
                 Resources.button_sets[name]['Time'][-1] = True
         elif name == 'adv_settings':
             Resources.button_sets[name] = {
-                'general' : (Button, (.1, .4), (.8, .1), 'General Settings', None),
-                'items' : (Button, (.1, .55), (.8, .1), 'Item Settings', None),
-                'controls' : (Button, (.1, .7), (.8, .1), 'Controls', None),
-                'back' : (Button, (.1, .85), (.8, .1), 'Back', Button.adv_back_event),
+                'general' : [Button, (.1, .4), (.8, .1), 'General Settings', Button.adv_general_event, False],
+                'items' : [Button, (.1, .55), (.8, .1), 'Item Settings', Button.adv_items_event, False],
+                'controls' : [Button, (.1, .7), (.8, .1), 'Controls', Button.adv_controls_event, False],
+                'back' : [Button, (.1, .85), (.8, .1), 'Back', Button.adv_back_event, False],
+            }
+        elif name == 'adv_general':
+            Resources.button_sets[name] = {
+                'resolution' :
+                    [Button, (.1, .4), (.8, .1),
+                    'Resolution: %ix' % Settings.resolution[0] + str(Settings.resolution[1]),
+                    Button.adv_general_res_event, False]
             }
         else:
             raise KeyError('the menu key "%s" is not present' % name)
@@ -333,7 +341,7 @@ class SpaceAttack:
         self.any_alive = True
 
     def load_background(self):
-        self.background_name = random.choice(self.__class__.background_names)
+        self.background_name = Settings.background
         self.background_sprite = Sprite(self.background_name, pos=(Settings.resolution[0] // 2, Settings.resolution[1] // 2), visible=True, scale=1.0)
 
     def load_players(self):
@@ -483,7 +491,6 @@ class SpaceAttack:
             self.spawncount = self.limit
 
 class Button:
-
     def __init__(self, pos, size, text, screen, grayed_out=False, event=None):
         self.rel_pos = pos
         self.rel_size = size
@@ -504,12 +511,15 @@ class Button:
             ], 4 if self.border else 1, '#ffffff', '#cccccc' if self.grayed_out else '#061c54')
         canvas.draw_text(self.text, (self.pos[0] + 10, self.pos[1] + self.size[1] * 3 / 4), self.size[1] // 2, 'White', 'sans-serif')
 
-    def event(self):
-        pass
-
     def point_collision(self, c):
         return ((c[0] >= self.pos[0]) and (c[0] <= self.pos[0] + self.size[0]) and
             (c[1] >= self.pos[1]) and (c[1] <= self.pos[1] + self.size[1]))
+
+    def event(self):
+        pass
+
+    def pass_event(self):
+        pass
 
     def single_multiplayer_event(self):
         players = [str(i) + ' Player' + ('s' if i > 1 else '') for i in (1, 2)]
@@ -541,7 +551,7 @@ class Button:
             Settings.is_time_mode = True
         Settings.modus = self.text
 
-    def start(self):
+    def start_event(self):
         window.start_game()
 
     def time_event(self):
@@ -550,16 +560,26 @@ class Button:
         Settings.max_time = int(self.text[6:-3]) * 60
 
     def adv_back_event(self):
-        self.screen.init_buttons()
+        window.start_menu('main_menu')
 
     def adv_settings_event(self):
-        self.screen.buttons = {
-            'general' : Button((.1, .4), (.8, .1), 'General Settings', self.screen),
-            'items' : Button((.1, .55), (.8, .1), 'Item Settings', self.screen),
-            'controls' : Button((.1, .7), (.8, .1), 'Controls', self.screen),
-            'back' : Button((.1, .85), (.8, .1), 'Back', self.screen),
-        }
-        self.screen.buttons['back'].event = self.screen.buttons['back'].adv_back_event
+        window.start_menu('adv_settings')
+
+    def adv_general_event(self):
+        print('General Settings')
+        pass
+
+    def adv_items_event(self):
+        print('Item Settings')
+        pass
+
+    def adv_controls_event(self):
+        print('Control Settings')
+        pass
+
+    def adv_general_res_event(self):
+        print('RESOLUTION')
+        pass
 
 class ImageButton(Button):
     def __init__(self, images, is_player1, is_player_skin, *kwargs):
@@ -621,19 +641,20 @@ class ButtonSet:
         for button in self.buttons.values():
             button.draw(canvas)
 
-class TitleScreen:
-    def __init__(self):
+class Menu:
+    def __init__(self, name):
+        self.name = name
         self.title_img = Resources.images['title image']
         self.title_sz = self.title_img.get_width(), self.title_img.get_height()
-        self.bg_img = Resources.images[random.choice(SpaceAttack.background_names)]
+        self.bg_img = Resources.images[Settings.background]
         self.bg_sz = self.bg_img.get_width(), self.bg_img.get_height()
         if self.bg_sz == (0, 0):
             print('SimpleGUI-Fehler')
         self.init_buttons()
 
     def init_buttons(self):
-        Resources.load_buttons('main_menu')
-        self.button_set = ButtonSet('main_menu')
+        Resources.load_buttons(self.name)
+        self.button_set = ButtonSet(self.name)
 
     def keydown_handler(self, key):
         if key == 27:
@@ -652,8 +673,8 @@ class Window:
         self.frame = simplegui.create_frame(title, Settings.resolution[0], Settings.resolution[1])
         self.frame.start()
 
-    def start_title_screen(self):
-        self.game = TitleScreen()
+    def start_menu(self, name='main_menu'):
+        self.game = Menu(name)
         self.frame.set_draw_handler(self.game.draw)
         self.frame.set_keydown_handler(self.game.keydown_handler)
         self.frame.set_mouseclick_handler(self.game.mouseclick_handler)
@@ -675,4 +696,4 @@ class Window:
 if __name__ == '__main__':
     Resources.load()
     window = Window('Space Attack')
-    window.start_title_screen()
+    window.start_menu()
