@@ -33,6 +33,9 @@ class Settings:
     max_time = 60
     is_2_players = True
     background = 'Background1'
+    controls = {
+        'p1_left' : simplegui.KEY_MAP['a']
+        }
 
 class Resources:
     image_urls = {
@@ -115,18 +118,57 @@ class Resources:
                 Resources.button_sets[name]['Time'][-1] = True
         elif name == 'adv_settings':
             Resources.button_sets[name] = {
-                'general' : [Button, (.1, .4), (.8, .1), 'General Settings', Button.adv_general_event, False],
-                'items' : [Button, (.1, .55), (.8, .1), 'Item Settings', Button.adv_items_event, False],
-                'controls' : [Button, (.1, .7), (.8, .1), 'Controls', Button.adv_controls_event, False],
-                'back' : [Button, (.1, .85), (.8, .1), 'Back', Button.adv_back_event, False],
+                'general' :
+                    [Button, (.1, .4), (.8, .1), 'General Settings',
+                    Button.adv_general_event, False],
+                'items' :
+                    [Button, (.1, .55), (.8, .1), 'Item Settings',
+                    Button.adv_items_event, False],
+                'controls' :
+                    [Button, (.1, .7), (.8, .1), 'Controls',
+                    Button.adv_controls_event, False],
+                'back' :
+                    [Button, (.1, .85), (.8, .1), 'Back',
+                    Button.adv_back_event, False],
             }
         elif name == 'adv_general':
             Resources.button_sets[name] = {
                 'resolution' :
                     [Button, (.1, .4), (.8, .1),
                     'Resolution: %ix' % Settings.resolution[0] + str(Settings.resolution[1]),
-                    Button.adv_general_res_event, False]
+                    Button.adv_gen_res_event, False],
+                'background' :
+                    [Button, (.1, .55), (.8, .1), 'Change background',
+                    Button.adv_gen_change_background_event, False],
+                'wraparound' :
+                    [Button, (.1, .70), (.8, .1),
+                    'Wraparound: ' + ('On' if Settings.wraparound else 'Off'),
+                    Button.adv_gen_wraparound_event, False],
+                'back' :
+                    [Button, (.1, .85), (.8, .1), 'Back',
+                    Button.adv_back_event, False]
             }
+        elif name == 'adv_items': # todo
+            Resources.button_sets[name] = {
+                'back' :
+                    [Button, (.1, .85), (.8, .1), 'Back',
+                    Button.adv_back_event, False]
+            } # todo
+        elif name == 'adv_controls': # todo
+            Resources.button_sets[name] = {
+                'p1_left' : [Button, (.1, .4), (.35, .1), 'Player 1 Left: ', Button.pass_event, False],
+                'p1_right' : [Button, (.1, .55), (.35, .1), 'Player 1 Right: ', Button.pass_event, False],
+                'p1_shoot' : [Button, (.1, .7), (.35, .1), 'Player 1 Shoot: ', Button.pass_event, False],
+                'p2_left' : [Button, (.55, .4), (.35, .1), 'Player 2 Left: ', Button.pass_event, False],
+                'p2_right' : [Button, (.55, .55), (.35, .1), 'Player 2 Right: ', Button.pass_event, False],
+                'p2_shoot' : [Button, (.55, .7), (.35, .1), 'Player 2 Shoot: ', Button.pass_event, False],
+                'back' :
+                    [Button, (.1, .85), (.8, .1), 'Back',
+                    Button.adv_back_event, False]
+                #simplegui.KEY_MAP.keys()[simplegui.KEY_MAP.values().index(key)]
+                #'p1_left' : [Button, (.1, .4), (.35, .1), 'Player 1 Left: %s' %s simplegui.KEY_MAP.values(65)]
+            }
+
         else:
             raise KeyError('the menu key "%s" is not present' % name)
 
@@ -566,20 +608,29 @@ class Button:
         window.start_menu('adv_settings')
 
     def adv_general_event(self):
-        print('General Settings')
-        pass
+        window.start_menu('adv_general')
 
     def adv_items_event(self):
-        print('Item Settings')
-        pass
+        window.start_menu('adv_items')
 
     def adv_controls_event(self):
-        print('Control Settings')
-        pass
+        window.start_menu('adv_controls')
 
-    def adv_general_res_event(self):
+    def adv_gen_res_event(self):
         print('RESOLUTION')
         pass
+
+    def adv_gen_change_background_event(self):
+        backgrounds = SpaceAttack.background_names
+        Settings.background = backgrounds[backgrounds.index(Settings.background) - 1]
+        window.game.bg_img = Resources.images[Settings.background]
+
+    def adv_gen_wraparound_event(self):
+        if Settings.wraparound:
+            Settings.wraparound = False
+        else:
+            Settings.wraparound = True
+        self.text = 'Wraparound: ' + ('On' if Settings.wraparound else 'Off')
 
 class ImageButton(Button):
     def __init__(self, images, is_player1, is_player_skin, *kwargs):
