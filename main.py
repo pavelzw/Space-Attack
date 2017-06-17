@@ -78,9 +78,41 @@ class Resources:
 
     images = dict()
 
+    button_sets = dict()
+
     def load():
         for name, url in Resources.image_urls.items():
             Resources.images[name] = simplegui.load_image(url)
+
+    def load_buttons(name):
+        if name == 'main_menu':
+            Resources.button_sets[name] = {
+                'Player_count' : (Button, (.1, .4), (.35, .1), '2 Players' if Settings.is_2_players else '1 Player', Button.single_multiplayer_event, False),
+                'Modi' : (Button, (.1, .55), (.35, .1), Settings.modus, Button.modi_event, False),
+                'Begin' : (Button, (.1, .7), (.35, .1), 'Begin', Button.start, False),
+                'Exit' : (Button, (.1, .85), (.35, .1), 'Exit', exit, False),
+                'Skin1' : (Button, (.55, .4), (.35, .1), 'Player 1', None, False),
+                'Skin2' : (Button, (.55, .55), (.35, .1), 'Player 2', None, False),
+                'Skin1Player' : (ImageButton, True, True, (.70, .4), (.1, .1), ImageButton.switch, player_images, False),
+                'Skin1Laser' : (ImageButton, True, False, (.80, .4), (.1, .1), ImageButton.switch, laser_images, False),
+                'Skin2Player' : (ImageButton, False, True, (.70, .55), (.1, .1), ImageButton.switch, player_images, False),
+                'Skin2Laser' : (ImageButton, False, False, (.80, .55), (.1, .1), ImageButton.switch, laser_images, False),
+                'Time' : (Button, (.55, .7), (.35, .1), 'Time: %imin' % (Settings.max_time // 60), Button.time_event, False),
+                'adv. settings' : (Button, (.55, .85), (.35, .1), 'Advanced Settings', Button.adv_settings_event, False)
+            }
+            if Resources.button_sets[name]['Player_count'][3] == '1 Player':
+                Resources.button_sets[name]['Skin2'][-1] = True
+                Resources.button_sets[name]['Skin2Player'][-1] = True
+                Resources.button_sets[name]['Skin2Laser'][-1] = True
+            if Resources.button_sets[name]['Time'][3] != 'Time':
+                Resources.button_sets[name]['Time'][-1] = True
+        elif name == 'adv_settings':
+            Resources.button_sets[name] = {
+                'general' : (Button, (.1, .4), (.8, .1), 'General Settings', None),
+                'items' : (Button, (.1, .55), (.8, .1), 'Item Settings', None),
+                'controls' : (Button, (.1, .7), (.8, .1), 'Controls', None),
+                'back' : (Button, (.1, .85), (.8, .1), 'Back', Button.adv_back_event),
+            }
 
 class Sprite:
     def __init__(self, type, pos=(0, 0), visible=False, rotation=0, scale=Settings.player_scale):
@@ -444,7 +476,7 @@ class SpaceAttack:
 
 class Button:
 
-    def __init__(self, pos, size, text, screen, grayed_out=False):
+    def __init__(self, pos, size, text, screen, grayed_out=False, event=None):
         self.rel_pos = pos
         self.rel_size = size
         self.pos = pos[0] * Settings.resolution[0], pos[1] * Settings.resolution[1]
@@ -453,6 +485,7 @@ class Button:
         self.grayed_out = grayed_out
         self.screen = screen
         self.border = True
+        self.event = event
 
     def draw(self, canvas):
         canvas.draw_polygon([
@@ -554,6 +587,21 @@ class ImageButton(Button):
             (self.pos[0] + self.size[0] / 2, self.pos[1] + self.size[1] / 2),
             (real_image_size[0] - 5, real_image_size[1] - 5))
 
+class ButtonSet:
+    def __init__(self, name):
+        self.name = name
+        self.buttons = dic
+        for bname, args in Resources.button_sets.items():
+            if args[0] == Button:
+                self.buttons[bname] = args[0](args[1], args[2], args[3], grayed_out=args[-1], event=args[4])
+            elif args[0] == ImageButton:
+                self.buttons[bname] = args[0](args[6], args[1], args[2], args[3], aargs[4], grayed_out=args[-1], event=args[5])
+
+    def onclick(self, pos):
+        for button in self.buttons.values():
+            if (not button.grayed_out) and button.point_collision(pos):
+                button.event()
+
 class TitleScreen:
     def __init__(self):
         self.title_img = Resources.images['title image']
@@ -607,9 +655,7 @@ class TitleScreen:
             exit(0)
 
     def mouseclick_handler(self, pos):
-        for button in self.buttons.values():
-            if (not button.grayed_out) and button.point_collision(pos):
-                button.event()
+        pass
 
     def draw(self, canvas):
         canvas.draw_image(self.bg_img, (self.bg_sz[0] / 2, self.bg_sz[1] / 2), self.bg_sz, (Settings.resolution[0] / 2, Settings.resolution[1] / 2), Settings.resolution)
