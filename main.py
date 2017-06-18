@@ -77,7 +77,7 @@ class Resources:
         'Laser3' : 'http://i.imgur.com/xnauZwI.png',
         'Laser4' : 'http://i.imgur.com/2oXXUh0.png',
 
-        'title image' : 'https://i.ytimg.com/vi/FBeYD7yFWxE/maxresdefault.jpg'
+        'title image' : 'http://i.imgur.com/TgbmCNg.png'
     }
 
     images = dict()
