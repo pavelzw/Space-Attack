@@ -4,6 +4,7 @@ import simplegui
 import time
 
 class Settings:
+    title = 'Space Attack'
     resolution = 1280, 720
     blue = '#0d36e3' # Rot, das im gesamten Spiel verwendet wird
     red = '#d01306' # Blau, das im gesamten Spiel verwendet wird
@@ -46,8 +47,8 @@ class Settings:
     # ADVANCED SETTINGS
     wraparound = True  # rechts raus, links wieder rein
     resolution_list = {
-        '4K' : (3840, 2160)
-        'Full HD' : (1920, 1080)
+        #'4K' : (3840, 2160),
+        'Full HD' : (1920, 1080),
         'HD' : (1280, 720)
         }
 
@@ -149,7 +150,8 @@ class Resources:
             Resources.button_sets[name] = {
                 'resolution' :
                     [Button, (.1, .4), (.8, .1),
-                    'Resolution: %ix' % Settings.resolution[0] + str(Settings.resolution[1]),
+                    'Resolution: %s'
+                    % Settings.resolution_list.keys()[Settings.resolution_list.values().index(Settings.resolution)], # hier soll der zugehörige String zur Auflösung gefunden werden... bei dicts klappt kein .index()
                     Button.adv_gen_res_event, False],
                 'background' :
                     [Button, (.1, .55), (.8, .1), 'Change background',
@@ -631,14 +633,15 @@ class Button:
         window.start_menu('adv_controls')
 
     def adv_gen_res_event(self):
-        res_list = Settings.resolution_list
-        keys=res_list.keys()
-        values=res_list.values()
-        Settings.resolution = res_list[values.index(Settings.resolution) - 1]
-        print keys[values.index(Settings.resolution)]
-        """WEITERMACHEN"""
-        #self.text = 'Resolution: ' + res_list[]
-        #window.frame = simplegui.create_frame(title, Settings.resolution[0], Settings.resolution[1])
+        if False: #hier wuerde nur ein schwarzer Screen kommen
+            res_list = Settings.resolution_list
+            keys=res_list.keys()
+            values=res_list.values()
+            new_res_text = keys[values.index(Settings.resolution) - 1]
+            Settings.resolution = res_list[new_res_text]
+            self.text = 'Resolution: ' + new_res_text
+            window.frame = simplegui.create_frame(Settings.title, Settings.resolution[0], Settings.resolution[1])
+            window.frame.start()
 
     def adv_gen_change_background_event(self):
         backgrounds = SpaceAttack.background_names
@@ -700,13 +703,11 @@ class ButtonSet:
     def onclick(self, pos):
         for button in self.buttons.values():
             if (not button.grayed_out) and button.point_collision(pos):
-                #print(button)
-                if button.__class__ == Button: # KOMISCHER FEHLER
-                    button.event(button)
-                    #print('Normalerbutton klappt')
+                # komischer Fehler
+                if button.__class__ == Button:
+                    button.event(button) # Button will noch self mit bekommen
                 elif button.__class__ == ImageButton:
-                    button.event()
-                    #print('Imgbutton klappt')
+                    button.event() # ImageButton will self nicht haben
 
     def draw(self, canvas):
         for button in self.buttons.values():
@@ -766,5 +767,5 @@ class Window:
 
 if __name__ == '__main__':
     Resources.load()
-    window = Window('Space Attack')
+    window = Window(Settings.title)
     window.start_menu()
