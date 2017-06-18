@@ -4,16 +4,16 @@ import simplegui
 import time
 
 class Settings:
-    resolution = 1152, 648 # 3/5 von Full HD
+    resolution = 1280, 720
     blue = '#0d36e3'
     red = '#d01306'
-    player_velocity = 1.5
+    player_velocity = 1.5 # Geschwindigkeit des Spielers
     player_angular_velocity = pi / 180 # Geschwindigkeit, mit der sich Spieler dreht
-    player_scale = .1
+    player_scale = .1 # Spieler ist 1/10 von Höhe groß
     player_cooldown = 50
-    player_invulnerability_time = 450
-    player_subtraction = 0.75
-    enemy_scale = .1
+    player_invulnerability_time = 450 # Zeit, die der Spieler unbesiegbar ist, nachdem er getroffen wurde
+    player_subtraction = 0.75 # Faktor, der abgezogen wird, wenn Spieler getroffen
+    enemy_scale = .1 # Gegner ist 1/10 von Höhe groß
     enemy_velocity = .5
     laser_scale = .03
     laser_velocity = 6
@@ -26,16 +26,23 @@ class Settings:
     player2_laser = 'Laser1'
     player1_skin = 'Player1'
     player2_skin = 'Player1'
+    background = 'Background1'
+    controls = {
+        'p1_left' : simplegui.KEY_MAP['a'],
+        'p1_right' : simplegui.KEY_MAP['d'],
+        'p1_shoot' : simplegui.KEY_MAP['space'],
+        'p2_left' : simplegui.KEY_MAP['left'],
+        'p2_right' : simplegui.KEY_MAP['right'],
+        'p2_shoot' : 13,
+        'end' : 27,
+        }
+    # GAMEMODES
     modi = ('Hardmode', 'Classic 10 Lifes', 'Classic 5 Lifes', 'Classic 3 Lifes', 'Time')
     modus = modi[-1]
     has_lifes = False
     is_time_mode = True
     max_time = 60
     is_2_players = True
-    background = 'Background1'
-    controls = {
-        'p1_left' : simplegui.KEY_MAP['a']
-        }
 
 class Resources:
     image_urls = {
@@ -494,29 +501,29 @@ class SpaceAttack:
                 canvas.draw_text(str(int(round(Settings.max_time - time.time() + self.timer))), (10, 45), 40, '#eeeeff', 'sans-serif')
 
     def keydown_handler(self, key):
-        if key == simplegui.KEY_MAP['a']:
+        if key == Settings.controls['p1_left']:
             self.sprites['Player1'].is_turnleft = True
-        elif key == simplegui.KEY_MAP['d']:
+        elif key == Settings.controls['p1_right']:
             self.sprites['Player1'].is_turnright = True
-        elif key == simplegui.KEY_MAP['left'] and Settings.is_2_players:
+        elif key == Settings.controls['p2_left'] and Settings.is_2_players:
             self.sprites['Player2'].is_turnleft = True
-        elif key == simplegui.KEY_MAP['right'] and Settings.is_2_players:
+        elif key == Settings.controls['p2_right'] and Settings.is_2_players:
             self.sprites['Player2'].is_turnright = True
-        elif key == simplegui.KEY_MAP['space']:
+        elif key == Settings.controls['p1_shoot']:
             self.sprites['Player1'].shoot()
-        elif key == 13 and Settings.is_2_players:
+        elif key == Settings.controls['p2_shoot'] and Settings.is_2_players:
             self.sprites['Player2'].shoot()
-        elif key == 27:
+        elif key == Settings.controls['end']:
             exit(0)
 
     def keyup_handler(self, key):
-        if key == simplegui.KEY_MAP['a']:
+        if key == Settings.controls['p1_left']:
             self.sprites['Player1'].is_turnleft = False
-        elif key == simplegui.KEY_MAP['d']:
+        elif key == Settings.controls['p1_right']:
             self.sprites['Player1'].is_turnright = False
-        elif key == simplegui.KEY_MAP['left'] and Settings.is_2_players:
+        elif key == Settings.controls['p2_left'] and Settings.is_2_players:
             self.sprites['Player2'].is_turnleft = False
-        elif key == simplegui.KEY_MAP['right'] and Settings.is_2_players:
+        elif key == Settings.controls['p2_right'] and Settings.is_2_players:
             self.sprites['Player2'].is_turnright = False
 
     def spawncounter(self):
@@ -708,7 +715,7 @@ class Menu:
         self.button_set = ButtonSet(self.name)
 
     def keydown_handler(self, key):
-        if key == 27:
+        if key == Settings.controls['end']:
             exit(0)
 
     def mouseclick_handler(self, pos):
