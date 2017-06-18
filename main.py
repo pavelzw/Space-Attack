@@ -5,8 +5,8 @@ import time
 
 class Settings:
     resolution = 1280, 720
-    blue = '#0d36e3'
-    red = '#d01306'
+    blue = '#0d36e3' # Rot, das im gesamten Spiel verwendet wird
+    red = '#d01306' # Blau, das im gesamten Spiel verwendet wird
     player_velocity = 1.5 # Geschwindigkeit des Spielers
     player_angular_velocity = pi / 180 # Geschwindigkeit, mit der sich Spieler dreht
     player_scale = .1 # Spieler ist 1/10 von Höhe groß
@@ -14,14 +14,13 @@ class Settings:
     player_invulnerability_time = 450 # Zeit, die der Spieler unbesiegbar ist, nachdem er getroffen wurde
     player_subtraction = 0.75 # Faktor, der abgezogen wird, wenn Spieler getroffen
     enemy_scale = .1 # Gegner ist 1/10 von Höhe groß
-    enemy_velocity = .5
-    laser_scale = .03
-    laser_velocity = 6
-    laser_distance = resolution[1] * player_scale * .4
-    wraparound = True  # rechts raus, links wieder rein
-    growth_max_limit = 1000
-    growth_min_limit = 200
-    growth_const = 0.06
+    enemy_velocity = .5 # Geschwindigkeit der Gegner
+    laser_scale = .03 # Laser ist 0.03 von Höhe groß
+    laser_velocity = 6 # Geschwindigkeit der Laser
+    laser_distance = resolution[1] * player_scale * .4 # Abstand zwischen Lasern
+    growth_max_limit = 1000 # maximale Gegnerspawntime (ms)
+    growth_min_limit = 200 # minimale Gegnerspawntime (ms)
+    growth_const = 0.06 # Konstante, mit der Gegnerspawntime exponentiell zunimmt
     player1_laser = 'Laser1'
     player2_laser = 'Laser1'
     player1_skin = 'Player1'
@@ -43,6 +42,14 @@ class Settings:
     is_time_mode = True
     max_time = 60
     is_2_players = True
+
+    # ADVANCED SETTINGS
+    wraparound = True  # rechts raus, links wieder rein
+    resolution_list = {
+        '4K' : (3840, 2160)
+        'Full HD' : (1920, 1080)
+        'HD' : (1280, 720)
+        }
 
 class Resources:
     image_urls = {
@@ -624,8 +631,14 @@ class Button:
         window.start_menu('adv_controls')
 
     def adv_gen_res_event(self):
-        print('RESOLUTION')
-        pass
+        res_list = Settings.resolution_list
+        keys=res_list.keys()
+        values=res_list.values()
+        Settings.resolution = res_list[values.index(Settings.resolution) - 1]
+        print keys[values.index(Settings.resolution)]
+        """WEITERMACHEN"""
+        #self.text = 'Resolution: ' + res_list[]
+        #window.frame = simplegui.create_frame(title, Settings.resolution[0], Settings.resolution[1])
 
     def adv_gen_change_background_event(self):
         backgrounds = SpaceAttack.background_names
