@@ -45,6 +45,11 @@ class Settings:
     is_2_players = True
 
     # ADVANCED SETTINGS
+    music_list = ('Gravity Falls', 'Against True Hero', 'Bonetrousle',
+        'Megalovania', 'Asgore Theme', 'Moon Theme')
+    song = music_list[0]
+    music = True
+    sounds = True
     wraparound = True  # rechts raus, links wieder rein
     resolution_list = {
         '4K' : (3840, 2160),
@@ -99,7 +104,7 @@ class Resources:
         'Laser' : 'http://k003.kiwi6.com/hotlink/htcy8y6r9z/laser1_Gun.flac',
 
         'Gravity Falls' : 'http://k003.kiwi6.com/hotlink/8uhh54qrlv/Gravity_Falls_Theme_Extended_8-bit_mix_.mp3',
-        'Battle Against a True Hero' : 'http://k003.kiwi6.com/hotlink/v4vaesgl3y/Undertale_-_Battle_Against_a_True_Hero.mp3',
+        'Against True Hero' : 'http://k003.kiwi6.com/hotlink/v4vaesgl3y/Undertale_-_Battle_Against_a_True_Hero.mp3',
         'Bonetrousle' : 'http://k003.kiwi6.com/hotlink/xlvl2x4otr/Undertale_-_Bonetrousle.mp3',
         'Megalovania' : 'http://k003.kiwi6.com/hotlink/xsocelu5qq/Undertale_-_Megalovania.mp3',
         'Asgore Theme' : 'http://k003.kiwi6.com/hotlink/81ddl0tzw1/Undertale_Asgore_Theme.mp3',
@@ -162,17 +167,29 @@ class Resources:
         elif name == 'adv_general':
             Resources.button_sets[name] = {
                 'resolution' :
-                    [Button, (.1, .4), (.8, .1),
+                    [Button, (.1, .4), (.35, .1),
                     'Resolution: %s'
                     % Settings.resolution_list.keys()[Settings.resolution_list.values().index(Settings.resolution)], # hier soll der zugehörige String zur Auflösung gefunden werden... bei dicts klappt kein .index()
                     Button.adv_gen_res_event, False],
                 'background' :
-                    [Button, (.1, .55), (.8, .1), 'Change background',
+                    [Button, (.1, .55), (.35, .1), 'Change background',
                     Button.adv_gen_change_background_event, False],
                 'wraparound' :
-                    [Button, (.1, .70), (.8, .1),
+                    [Button, (.1, .7), (.35, .1),
                     'Wraparound: ' + ('On' if Settings.wraparound else 'Off'),
                     Button.adv_gen_wraparound_event, False],
+                'current_song' :
+                    [Button, (.55, .4), (.35, .1),
+                    'Song: ' + Settings.song,
+                    Button.adv_gen_song_pick_event, False],
+                'music' :
+                    [Button, (.55, .55), (.35, .1),
+                    'Music: ' + ('On' if Settings.music else 'Off'),
+                    Button.adv_gen_music_event, False],
+                'sounds' :
+                    [Button, (.55, .7), (.35, .1),
+                    'Sounds: ' + ('On' if Settings.sounds else 'Off'),
+                    Button.adv_gen_sounds_event, False],
                 'back' :
                     [Button, (.1, .85), (.8, .1), 'Back',
                     Button.adv_back_event, False]
@@ -415,6 +432,7 @@ class SpaceAttack:
         self.running = False
         self.enemy_counter = 0
         self.any_alive = True
+        self.music_handler()
 
     def load_background(self):
         self.background_name = Settings.background
@@ -557,6 +575,13 @@ class SpaceAttack:
         elif key == Settings.controls['p2_right'] and Settings.is_2_players:
             self.sprites['Player2'].is_turnright = False
 
+    def music_handler(self, command=Settings.music, song=Settings.song):
+        if command:
+            Resources.sounds[song].set_volume(.5)
+            Resources.sounds[song].play()
+        if not command:
+            Resources.sounds[song].pause()
+
     def spawncounter(self):
         self.spawncount -= 1
         if self.spawncount <= 0:
@@ -676,6 +701,27 @@ class Button:
         else:
             Settings.wraparound = True
         self.text = 'Wraparound: ' + ('On' if Settings.wraparound else 'Off')
+
+    def adv_gen_song_pick_event(self):
+        songs = [i for i in Settings.music_list]
+        Settings.song = songs[songs.index(Settings.song) - 1]
+        self.text = 'Song: ' + Settings.song
+
+    def adv_gen_music_event(self):
+        if Settings.music:
+            Settings.music = False
+            self.screen.buttons['current_song'].grayed_out = True
+        else:
+            Settings.music = True
+            self.screen.buttons['current_song'].grayed_out = False
+        self.text = 'Music: ' + ('On' if Settings.music else 'Off')
+
+    def adv_gen_sounds_event(self):
+        if Settings.sounds:
+            Settings.sounds = False
+        else:
+            Settings.sounds = True
+        self.text = 'Sounds: ' + ('On' if Settings.sounds else 'Off')
 
 class ImageButton(Button):
     def __init__(self, images, is_player1, is_player_skin, *kwargs):
