@@ -47,7 +47,7 @@ class Settings:
     # ADVANCED SETTINGS
     wraparound = True  # rechts raus, links wieder rein
     resolution_list = {
-        #'4K' : (3840, 2160),
+        '4K' : (3840, 2160),
         'Full HD' : (1920, 1080),
         'HD' : (1280, 720)
         }
@@ -718,6 +718,9 @@ class Menu:
         self.name = name
         self.title_img = Resources.images['Logo']
         self.title_sz = self.title_img.get_width(), self.title_img.get_height()
+        self.title_real_sz = (Settings.resolution[1] * .25 / self.title_sz[1]
+        * self.title_sz[0], Settings.resolution[1] * .25)
+        self.title_pos = (Settings.resolution[0] / 2, Settings.resolution[1] * .2)
         self.bg_img = Resources.images[Settings.background]
         self.bg_sz = self.bg_img.get_width(), self.bg_img.get_height()
         if self.bg_sz == (0, 0):
@@ -737,7 +740,11 @@ class Menu:
 
     def draw(self, canvas):
         canvas.draw_image(self.bg_img, (self.bg_sz[0] / 2, self.bg_sz[1] / 2), self.bg_sz, (Settings.resolution[0] / 2, Settings.resolution[1] / 2), Settings.resolution)
-        canvas.draw_image(self.title_img, (self.title_sz[0] / 2, self.title_sz[1] / 2), self.title_sz, (Settings.resolution[0] / 2, .2 * self.title_sz[1] / 2), (self.title_sz[0] * .3, self.title_sz[1] * .3))
+        canvas.draw_image(self.title_img,
+            (self.title_sz[0] / 2, self.title_sz[1] / 2),
+            self.title_sz,
+            self.title_pos,
+            self.title_real_sz)
         self.button_set.draw(canvas)
 
 class Window:
