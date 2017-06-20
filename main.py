@@ -47,7 +47,7 @@ class Settings:
     # ADVANCED SETTINGS
     music_list = ('Gravity Falls', 'Against True Hero', 'Bonetrousle',
         'Megalovania', 'Asgore Theme', 'Moon Theme')
-    song = music_list[0]
+    song = random.choice(music_list)
     music = True
     sounds = True
     wraparound = True  # rechts raus, links wieder rein
