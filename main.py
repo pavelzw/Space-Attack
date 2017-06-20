@@ -92,7 +92,7 @@ class Resources:
         'Laser3' : 'http://i.imgur.com/xnauZwI.png',
         'Laser4' : 'http://i.imgur.com/2oXXUh0.png',
 
-        'title image' : 'http://i.imgur.com/TgbmCNg.png'
+        'Logo' : 'http://i.imgur.com/PZLQv9T.png'
     }
 
     images = dict()
@@ -716,7 +716,7 @@ class ButtonSet:
 class Menu:
     def __init__(self, name):
         self.name = name
-        self.title_img = Resources.images['title image']
+        self.title_img = Resources.images['Logo']
         self.title_sz = self.title_img.get_width(), self.title_img.get_height()
         self.bg_img = Resources.images[Settings.background]
         self.bg_sz = self.bg_img.get_width(), self.bg_img.get_height()
