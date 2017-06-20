@@ -95,9 +95,22 @@ class Resources:
         'Logo' : 'http://i.imgur.com/3CbkPD6.png'
     }
 
+    sound_urls = {
+        'Laser' : 'http://k003.kiwi6.com/hotlink/htcy8y6r9z/laser1_Gun.flac',
+
+        'Gravity Falls' : 'http://k003.kiwi6.com/hotlink/8uhh54qrlv/Gravity_Falls_Theme_Extended_8-bit_mix_.mp3',
+        'Battle Against a True Hero' : 'http://k003.kiwi6.com/hotlink/v4vaesgl3y/Undertale_-_Battle_Against_a_True_Hero.mp3',
+        'Bonetrousle' : 'http://k003.kiwi6.com/hotlink/xlvl2x4otr/Undertale_-_Bonetrousle.mp3',
+        'Megalovania' : 'http://k003.kiwi6.com/hotlink/xsocelu5qq/Undertale_-_Megalovania.mp3',
+        'Asgore Theme' : 'http://k003.kiwi6.com/hotlink/81ddl0tzw1/Undertale_Asgore_Theme.mp3',
+        'Moon Theme' : 'http://k003.kiwi6.com/hotlink/lds54k47u2/Ducktales_Remastered_Soundtrack_-_Moon_Theme.mp3'
+    }
+
     images = dict()
 
     button_sets = dict()
+
+    sounds = dict()
 
     def load():
         for name, url in Resources.image_urls.items():
@@ -187,6 +200,11 @@ class Resources:
 
         else:
             raise KeyError('the menu key "%s" is not present' % name)
+
+    def load_sounds():
+        for name, url in Resources.sound_urls.items():
+            Resources.sounds[name] = simplegui.load_sound(url)
+
 
 class Sprite:
     def __init__(self, type, pos=(0, 0), visible=False, rotation=0, scale=Settings.player_scale):
@@ -778,5 +796,6 @@ class Window:
 
 if __name__ == '__main__':
     Resources.load()
+    Resources.load_sounds()
     window = Window(Settings.title)
     window.start_menu()
