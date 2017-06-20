@@ -34,7 +34,7 @@ class Settings:
         'p2_left' : simplegui.KEY_MAP['left'],
         'p2_right' : simplegui.KEY_MAP['right'],
         'p2_shoot' : 13,
-        'end' : 27,
+        'end' : 27
         }
     # GAMEMODES
     modi = ('Hardmode', 'Classic 10 Lifes', 'Classic 5 Lifes', 'Classic 3 Lifes', 'Time')
