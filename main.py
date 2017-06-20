@@ -512,12 +512,16 @@ class SpaceAttack:
     def keydown_handler(self, key):
         if key == Settings.controls['p1_left']:
             self.sprites['Player1'].is_turnleft = True
+            self.sprites['Player1'].is_turnright = False
         elif key == Settings.controls['p1_right']:
             self.sprites['Player1'].is_turnright = True
+            self.sprites['Player1'].is_turnleft = False
         elif key == Settings.controls['p2_left'] and Settings.is_2_players:
             self.sprites['Player2'].is_turnleft = True
+            self.sprites['Player2'].is_turnright = False
         elif key == Settings.controls['p2_right'] and Settings.is_2_players:
             self.sprites['Player2'].is_turnright = True
+            self.sprites['Player2'].is_turnleft = False
         elif key == Settings.controls['p1_shoot']:
             self.sprites['Player1'].shoot()
         elif key == Settings.controls['p2_shoot'] and Settings.is_2_players:
