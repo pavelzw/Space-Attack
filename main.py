@@ -575,7 +575,8 @@ class SpaceAttack:
         elif key == Settings.controls['p2_right'] and Settings.is_2_players:
             self.sprites['Player2'].is_turnright = False
 
-    def music_handler(self, command=Settings.music, song=Settings.song):
+    def music_handler(self, command=Settings.music):
+        song = Settings.song
         if command:
             Resources.sounds[song].set_volume(.5)
             Resources.sounds[song].play()
@@ -786,6 +787,8 @@ class Menu:
         self.name = name
         self.title_img = Resources.images['Logo']
         self.title_sz = self.title_img.get_width(), self.title_img.get_height()
+        if self.title_sz[0] == 0 or self.title_sz[1] == 0:
+            print('SimpleGUI Fehler')
         self.title_real_sz = (Settings.resolution[1] * .25 / self.title_sz[1]
         * self.title_sz[0], Settings.resolution[1] * .25)
         self.title_pos = (Settings.resolution[0] / 2, Settings.resolution[1] * .2)
