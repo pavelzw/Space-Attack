@@ -368,6 +368,9 @@ class Player(PlayerSprite):
             self.lasers.append(laser1)
             self.lasers.append(laser2)
             self.cooldown = self.max_cooldown
+            if Settings.sounds:
+                Resources.sounds['Laser'].set_volume(.5)
+                Resources.sounds['Laser'].play()
 
     def get_hit(self):
         if self.invincible_counter <= 0:
@@ -575,8 +578,9 @@ class SpaceAttack:
         elif key == Settings.controls['p2_right'] and Settings.is_2_players:
             self.sprites['Player2'].is_turnright = False
 
-    def music_handler(self, command=Settings.music):
+    def music_handler(self):
         song = Settings.song
+        command = Settings.music
         if command:
             Resources.sounds[song].set_volume(.5)
             Resources.sounds[song].play()
