@@ -215,9 +215,6 @@ class Resources:
                 #'p1_left' : [Button, (.1, .4), (.35, .1), 'Player 1 Left: %s' %s simplegui.KEY_MAP.values(65)]
             }
 
-        else:
-            raise KeyError('the menu key "%s" is not present' % name)
-
     def load_sounds():
         for name, url in Resources.sound_urls.items():
             Resources.sounds[name] = simplegui.load_sound(url)
