@@ -1,3 +1,4 @@
+# properties.py
 from math import pi
 import simplegui
 import random
@@ -120,12 +121,12 @@ class Resources:
         for name, url in Resources.image_urls.items():
             Resources.images[name] = simplegui.load_image(url)
 
-    def load_buttons(name):
+    def load_buttons(name, Button, ImageButton, player_names, laser_names):
         player_images = dict()
         laser_images = dict()
-        for i in SpaceAttack.player_names:
+        for i in player_names:
             player_images[i] = Resources.images[i]
-        for i in SpaceAttack.laser_names:
+        for i in laser_names:
             laser_images[i] = Resources.images[i]
         if name == 'main_menu':
             Resources.button_sets[name] = {

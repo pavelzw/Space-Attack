@@ -1,9 +1,10 @@
+# main.py
 from math import pi, sin, cos, sqrt, exp
 import random
 import simplegui
 import time
-import user43_lTsGhE6vEC_4 as sprites # sprites.py
-from user43_2Ubrzc1uwM_3 import Settings, Resources # properties.py
+import user43_QlOAN8LSaf_7 as sprites # sprites.py
+from user43_7yqHvQrReO_1 import Settings, Resources # properties.py
 
 class SpaceAttack:
     spawncount = 0
@@ -183,9 +184,9 @@ class SpaceAttack:
         self.spawncount -= 1
         if self.spawncount <= 0:
             if Settings.is_2_players:
-                enemy = sprites.Enemy((self.sprites['Player1'], self.sprites['Player2']))
+                enemy = sprites.Enemy((self.sprites['Player1'], self.sprites['Player2']), SpaceAttack.enemy_names)
             else:
-                enemy = sprites.Enemy((self.sprites['Player1'],))
+                enemy = sprites.Enemy((self.sprites['Player1'],), SpaceAttack.enemy_names)
             enemy.spawn()
             self.sprites['Enemy' + str(self.enemy_counter)] = enemy
             self.enemy_counter += 1
@@ -395,7 +396,7 @@ class Menu:
         self.init_buttons()
 
     def init_buttons(self):
-        Resources.load_buttons(self.name)
+        Resources.load_buttons(self.name, Button, ImageButton, SpaceAttack.player_names, SpaceAttack.laser_names)
         self.button_set = ButtonSet(self.name)
 
     def keydown_handler(self, key):

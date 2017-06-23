@@ -1,4 +1,7 @@
-from user43_2Ubrzc1uwM_3 import Settings, Resources # properties.py
+# sprites.py
+from user43_7yqHvQrReO_1 import Settings, Resources # properties.py
+import random
+from math import sqrt, cos, sin, pi
 
 class Sprite:
     def __init__(self, type, pos=(0, 0), visible=False, rotation=0, scale=Settings.player_scale):
@@ -23,8 +26,8 @@ class Sprite:
         pass
 
 class Enemy(Sprite):
-    def __init__(self, targets):
-        Sprite.__init__(self, random.choice(SpaceAttack.enemy_names),
+    def __init__(self, targets, enemy_names):
+        Sprite.__init__(self, random.choice(enemy_names),
             visible=False, scale=Settings.enemy_scale)
         self.v = Settings.enemy_velocity
         self.targets = targets
