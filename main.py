@@ -1,6 +1,5 @@
 # main.py
-from math import pi, sin, cos, sqrt, exp
-import random
+from math import exp
 import simplegui
 import time
 import user43_QlOAN8LSaf_7 as sprites # sprites.py
