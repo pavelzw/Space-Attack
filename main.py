@@ -2,8 +2,8 @@
 from math import exp
 import simplegui
 import time
-import user43_QlOAN8LSaf_7 as sprites # sprites.py
-from user43_7yqHvQrReO_1 import Settings, Resources # properties.py
+import user43_QlOAN8LSaf_10 as sprites # sprites.py
+from user43_6kb1BpXagy_4 import Settings, Resources # properties.py
 
 class SpaceAttack:
     spawncount = 0

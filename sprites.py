@@ -1,5 +1,5 @@
 # sprites.py
-from user43_7yqHvQrReO_1 import Settings, Resources # properties.py
+from user43_7yqHvQrReO_4 import Settings, Resources # properties.py
 import random
 from math import sqrt, cos, sin, pi
 

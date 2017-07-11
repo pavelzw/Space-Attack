@@ -45,7 +45,7 @@ class Settings:
     is_2_players = True
 
     # ADVANCED SETTINGS
-    music_list = ('Gravity Falls', 'Against True Hero', 'Bonetrousle',
+    music_list = ('Gravity Falls', 'Battle Against True Hero', 'Bonetrousle',
         'Megalovania', 'Asgore Theme', 'Moon Theme')
     song = random.choice(music_list)
     music = True
@@ -104,7 +104,7 @@ class Resources:
         'Laser' : 'http://k003.kiwi6.com/hotlink/htcy8y6r9z/laser1_Gun.flac',
 
         'Gravity Falls' : 'http://k003.kiwi6.com/hotlink/8uhh54qrlv/Gravity_Falls_Theme_Extended_8-bit_mix_.mp3',
-        'Against True Hero' : 'http://k003.kiwi6.com/hotlink/v4vaesgl3y/Undertale_-_Battle_Against_a_True_Hero.mp3',
+        'Battle Against True Hero' : 'http://k003.kiwi6.com/hotlink/v4vaesgl3y/Undertale_-_Battle_Against_a_True_Hero.mp3',
         'Bonetrousle' : 'http://k003.kiwi6.com/hotlink/xlvl2x4otr/Undertale_-_Bonetrousle.mp3',
         'Megalovania' : 'http://k003.kiwi6.com/hotlink/xsocelu5qq/Undertale_-_Megalovania.mp3',
         'Asgore Theme' : 'http://k003.kiwi6.com/hotlink/81ddl0tzw1/Undertale_Asgore_Theme.mp3',
@@ -141,7 +141,7 @@ class Resources:
                 'Skin2Player' : [ImageButton, False, True, (.70, .55), (.1, .1), ImageButton.switch, player_images, False],
                 'Skin2Laser' : [ImageButton, False, False, (.80, .55), (.1, .1), ImageButton.switch, laser_images, False],
                 'Time' : [Button, (.55, .7), (.35, .1), 'Time: %imin' % (Settings.max_time // 60), Button.time_event, False],
-                'adv. settings' : [Button, (.55, .85), (.35, .1), 'Advanced Settings', Button.adv_settings_event, False]
+                'adv. settings' : [Button, (.55, .85), (.35, .1), 'Advanced Settings', Button.adv_general_event, False] # eig adv_back_event, aber nicht genug Einstellungen
             }
             if Resources.button_sets[name]['Player_count'][3] == '1 Player':
                 Resources.button_sets[name]['Skin2'][-1] = True
@@ -149,28 +149,28 @@ class Resources:
                 Resources.button_sets[name]['Skin2Laser'][-1] = True
             if Resources.button_sets[name]['Modi'][3] != 'Time':
                 Resources.button_sets[name]['Time'][-1] = True
-        elif name == 'adv_settings':
-            Resources.button_sets[name] = {
-                'general' :
-                    [Button, (.1, .4), (.8, .1), 'General Settings',
-                    Button.adv_general_event, False],
-                'items' :
-                    [Button, (.1, .55), (.8, .1), 'Item Settings',
-                    Button.adv_items_event, False],
-                'controls' :
-                    [Button, (.1, .7), (.8, .1), 'Controls',
-                    Button.adv_controls_event, False],
-                'back' :
-                    [Button, (.1, .85), (.8, .1), 'Back',
-                    Button.adv_back_event, False],
-            }
+#        elif name == 'adv_settings':
+#            Resources.button_sets[name] = {
+#                'general' :
+#                    [Button, (.1, .4), (.8, .1), 'General Settings',
+#                    Button.adv_general_event, False],
+#                'items' :
+#                    [Button, (.1, .55), (.8, .1), 'Item Settings',
+#                    Button.adv_items_event, False],
+#                'controls' :
+#                    [Button, (.1, .7), (.8, .1), 'Controls',
+#                    Button.adv_controls_event, False],
+#                'back' :
+#                    [Button, (.1, .85), (.8, .1), 'Back',
+#                    Button.adv_back_event, False],
+#            }
         elif name == 'adv_general':
             Resources.button_sets[name] = {
-                'resolution' :
-                    [Button, (.1, .4), (.35, .1),
-                    'Resolution: %s'
-                    % Settings.resolution_list.keys()[Settings.resolution_list.values().index(Settings.resolution)], # hier soll der zugehörige String zur Auflösung gefunden werden... bei dicts klappt kein .index()
-                    Button.adv_gen_res_event, False],
+#                'resolution' :
+#                    [Button, (.1, .4), (.35, .1),
+#                    'Resolution: %s'
+#                    % Settings.resolution_list.keys()[Settings.resolution_list.values().index(Settings.resolution)], # hier soll der zugehörige String zur Auflösung gefunden werden... bei dicts klappt kein .index()
+#                    Button.adv_gen_res_event, False],
                 'background' :
                     [Button, (.1, .55), (.35, .1), 'Change background',
                     Button.adv_gen_change_background_event, False],
@@ -179,7 +179,7 @@ class Resources:
                     'Wraparound: ' + ('On' if Settings.wraparound else 'Off'),
                     Button.adv_gen_wraparound_event, False],
                 'current_song' :
-                    [Button, (.55, .4), (.35, .1),
+                    [Button, (.1, .4), (.8, .1), # eig nur die Hälfte groß, auf andere Seite kommt Resolution
                     'Song: ' + Settings.song,
                     Button.adv_gen_song_pick_event, False],
                 'music' :
@@ -194,26 +194,28 @@ class Resources:
                     [Button, (.1, .85), (.8, .1), 'Back',
                     Button.adv_back_event, False]
             }
-        elif name == 'adv_items': # todo
-            Resources.button_sets[name] = {
-                'back' :
-                    [Button, (.1, .85), (.8, .1), 'Back',
-                    Button.adv_back_event, False]
-            } # todo
-        elif name == 'adv_controls': # todo
-            Resources.button_sets[name] = {
-                'p1_left' : [Button, (.1, .4), (.35, .1), 'Player 1 Left: ', Button.pass_event, False],
-                'p1_right' : [Button, (.1, .55), (.35, .1), 'Player 1 Right: ', Button.pass_event, False],
-                'p1_shoot' : [Button, (.1, .7), (.35, .1), 'Player 1 Shoot: ', Button.pass_event, False],
-                'p2_left' : [Button, (.55, .4), (.35, .1), 'Player 2 Left: ', Button.pass_event, False],
-                'p2_right' : [Button, (.55, .55), (.35, .1), 'Player 2 Right: ', Button.pass_event, False],
-                'p2_shoot' : [Button, (.55, .7), (.35, .1), 'Player 2 Shoot: ', Button.pass_event, False],
-                'back' :
-                    [Button, (.1, .85), (.8, .1), 'Back',
-                    Button.adv_back_event, False]
-                #simplegui.KEY_MAP.keys()[simplegui.KEY_MAP.values().index(key)]
-                #'p1_left' : [Button, (.1, .4), (.35, .1), 'Player 1 Left: %s' %s simplegui.KEY_MAP.values(65)]
-            }
+            if Resources.button_sets[name]['music'][3] == 'Music: Off':
+                Resources.button_sets[name]['current_song'][-1] = True
+#        elif name == 'adv_items': # todo
+#            Resources.button_sets[name] = {
+#                'back' :
+#                    [Button, (.1, .85), (.8, .1), 'Back',
+#                    Button.adv_back_event, False]
+#            } # todo
+#        elif name == 'adv_controls': # todo
+#            Resources.button_sets[name] = {
+#                'p1_left' : [Button, (.1, .4), (.35, .1), 'Player 1 Left: ', Button.pass_event, False],
+#                'p1_right' : [Button, (.1, .55), (.35, .1), 'Player 1 Right: ', Button.pass_event, False],
+#                'p1_shoot' : [Button, (.1, .7), (.35, .1), 'Player 1 Shoot: ', Button.pass_event, False],
+#                'p2_left' : [Button, (.55, .4), (.35, .1), 'Player 2 Left: ', Button.pass_event, False],
+#                'p2_right' : [Button, (.55, .55), (.35, .1), 'Player 2 Right: ', Button.pass_event, False],
+#                'p2_shoot' : [Button, (.55, .7), (.35, .1), 'Player 2 Shoot: ', Button.pass_event, False],
+#                'back' :
+#                    [Button, (.1, .85), (.8, .1), 'Back',
+#                    Button.adv_back_event, False]
+#                #simplegui.KEY_MAP.keys()[simplegui.KEY_MAP.values().index(key)]
+#                #'p1_left' : [Button, (.1, .4), (.35, .1), 'Player 1 Left: %s' %s simplegui.KEY_MAP.values(65)]
+#            }
 
     def load_sounds():
         for name, url in Resources.sound_urls.items():
